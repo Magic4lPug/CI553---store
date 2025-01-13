@@ -6,21 +6,19 @@ import middle.StockException;
 import javax.swing.*;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 
 /**
- * Defines the RMI interface for read access to the stock object.
- * @author  Mike Smith University of Brighton
- * @version 2.0
+ * Remote interface for stock reading.
  */
+public interface RemoteStockR_I extends Remote {
+  boolean exists(String pNum) throws RemoteException, StockException;
 
-public interface RemoteStockR_I
-       extends Remote
-{
-  boolean   exists(String number)
-            throws RemoteException, StockException;
-  Product   getDetails(String number)
-            throws RemoteException, StockException;
-  ImageIcon getImage(String number)
-            throws RemoteException, StockException;
+  Product getDetails(String pNum) throws RemoteException, StockException;
+
+  List<Product> getAllProducts() throws RemoteException, StockException;
+
+  List<Product> searchProducts(String query) throws RemoteException, StockException;
+
+  ImageIcon getImage(String pNum) throws RemoteException, StockException;
 }
-

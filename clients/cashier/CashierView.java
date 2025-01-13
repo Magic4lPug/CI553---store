@@ -1,131 +1,137 @@
 package clients.cashier;
 
-import catalogue.Basket;
+import clients.backDoor.BackDoorView;
+import clients.packing.PackingView;
 import middle.MiddleFactory;
-import middle.OrderProcessing;
-import middle.StockReadWriter;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.Observable;
 import java.util.Observer;
 
+public class CashierView implements Observer {
+  private static final int H = 500; // Height of window pixels
+  private static final int W = 600; // Width of window pixels
 
-/**
- * View of the model 
- */
-public class CashierView implements Observer
-{
-  private static final int H = 300;       // Height of window pixels
-  private static final int W = 400;       // Width  of window pixels
-  
-  private static final String CHECK  = "Check";
-  private static final String BUY    = "Buy";
-  private static final String BOUGHT = "Bought/Pay";
+  private final JTabbedPane tabbedPane = new JTabbedPane();
+  private final JTable taskTable = new JTable(); // Task table
+  private final JScrollPane taskScrollPane = new JScrollPane(taskTable);
+  private final JButton refreshTasksButton = new JButton("Refresh Tasks");
 
-  private final JLabel      pageTitle  = new JLabel();
-  private final JLabel      theAction  = new JLabel();
-  private final JTextField  theInput   = new JTextField();
-  private final JTextArea   theOutput  = new JTextArea();
-  private final JScrollPane theSP      = new JScrollPane();
-  private final JButton     theBtCheck = new JButton( CHECK );
-  private final JButton     theBtBuy   = new JButton( BUY );
-  private final JButton     theBtBought= new JButton( BOUGHT );
+  private final JTable claimedTaskTable = new JTable(); // Table for claimed tasks
+  private final JScrollPane claimedTaskScrollPane = new JScrollPane(claimedTaskTable);
+  private final JButton claimTaskButton = new JButton("Claim Task");
 
-  private StockReadWriter theStock     = null;
-  private OrderProcessing theOrder     = null;
-  private CashierController cont       = null;
-  
-  /**
-   * Construct the view
-   * @param rpc   Window in which to construct
-   * @param mf    Factor to deliver order and stock objects
-   * @param x     x-coordinate of position of window on screen 
-   * @param y     y-coordinate of position of window on screen  
-   */
-          
-  public CashierView(  RootPaneContainer rpc,  MiddleFactory mf, int x, int y  )
-  {
-    try                                           // 
-    {      
-      theStock = mf.makeStockReadWriter();        // Database access
-      theOrder = mf.makeOrderProcessing();        // Process order
-    } catch ( Exception e )
-    {
-      System.out.println("Exception: " + e.getMessage() );
-    }
-    Container cp         = rpc.getContentPane();    // Content Pane
-    Container rootWindow = (Container) rpc;         // Root Window
-    cp.setLayout(null);                             // No layout manager
-    rootWindow.setSize( W, H );                     // Size of Window
-    rootWindow.setLocation( x, y );
+  private final JTable processingTaskTable = new JTable(); // Table for processing tasks
+  private final JScrollPane processingTaskScrollPane = new JScrollPane(processingTaskTable);
+  private final JButton completeTaskButton = new JButton("Complete Task");
 
-    Font f = new Font("Monospaced",Font.PLAIN,12);  // Font f is
+  private final JTable packedTaskTable = new JTable(); // Table for packed tasks
+  private final JScrollPane packedTaskScrollPane = new JScrollPane(packedTaskTable);
 
-    pageTitle.setBounds( 110, 0 , 270, 20 );       
-    pageTitle.setText( "Thank You for Shopping at MiniStrore" );                        
-    cp.add( pageTitle );  
-    
-    theBtCheck.setBounds( 16, 25+60*0, 80, 40 );    // Check Button
-    theBtCheck.addActionListener(                   // Call back code
-      e -> cont.doCheck( theInput.getText() ) );
-    cp.add( theBtCheck );                           //  Add to canvas
+  private final JLabel theOutput = new JLabel("Status: Ready"); // Added status output
+  private CashierController cont;
 
-    theBtBuy.setBounds( 16, 25+60*1, 80, 40 );      // Buy button 
-    theBtBuy.addActionListener(                     // Call back code
-      e -> cont.doBuy() );
-    cp.add( theBtBuy );                             //  Add to canvas
+  public CashierView(RootPaneContainer rpc, MiddleFactory mf, int x, int y) {
+    Container cp = rpc.getContentPane();
+    Container rootWindow = (Container) rpc;
+    cp.setLayout(null);
+    rootWindow.setSize(W, H);
+    rootWindow.setLocation(x, y);
 
-    theBtBought.setBounds( 16, 25+60*3, 80, 40 );   // Bought Button
-    theBtBought.addActionListener(                  // Call back code
-      e -> cont.doBought() );
-    cp.add( theBtBought );                          //  Add to canvas
+    // Tab 1: Tasks
+    JPanel taskPanel = new JPanel(null);
+    taskScrollPane.setBounds(10, 10, 560, 300);
+    taskPanel.add(taskScrollPane);
 
-    theAction.setBounds( 110, 25 , 270, 20 );       // Message area
-    theAction.setText( "" );                        // Blank
-    cp.add( theAction );                            //  Add to canvas
+    refreshTasksButton.setBounds(10, 320, 150, 30);
+    refreshTasksButton.addActionListener(e -> cont.refreshTasks());
+    taskPanel.add(refreshTasksButton);
 
-    theInput.setBounds( 110, 50, 270, 40 );         // Input Area
-    theInput.setText("");                           // Blank
-    cp.add( theInput );                             //  Add to canvas
+    tabbedPane.addTab("Tasks", taskPanel);
 
-    theSP.setBounds( 110, 100, 270, 160 );          // Scrolling pane
-    theOutput.setText( "" );                        //  Blank
-    theOutput.setFont( f );                         //  Uses font  
-    cp.add( theSP );                                //  Add to canvas
-    theSP.getViewport().add( theOutput );           //  In TextArea
-    rootWindow.setVisible( true );                  // Make visible
-    theInput.requestFocus();                        // Focus is here
+    // Tab 2: Claimed Tasks
+    JPanel claimedTaskPanel = new JPanel(null);
+    claimedTaskScrollPane.setBounds(10, 10, 560, 300);
+    claimedTaskPanel.add(claimedTaskScrollPane);
+
+    claimTaskButton.setBounds(10, 320, 150, 30);
+    claimTaskButton.addActionListener(e -> {
+      int selectedRow = taskTable.getSelectedRow();
+      if (selectedRow != -1) {
+        cont.claimTask(selectedRow); // Claim selected task
+      } else {
+        JOptionPane.showMessageDialog(null, "No task selected!");
+      }
+    });
+    claimedTaskPanel.add(claimTaskButton);
+
+    tabbedPane.addTab("Claimed Tasks", claimedTaskPanel);
+
+    // Tab 3: Processing Tasks
+    JPanel processingTaskPanel = new JPanel(null);
+    processingTaskScrollPane.setBounds(10, 10, 560, 300);
+    processingTaskPanel.add(processingTaskScrollPane);
+
+    completeTaskButton.setBounds(10, 320, 150, 30);
+    completeTaskButton.addActionListener(e -> {
+      int selectedRow = claimedTaskTable.getSelectedRow();
+      if (selectedRow != -1) {
+        cont.completeProcessingTask(selectedRow); // Complete processing task
+      } else {
+        JOptionPane.showMessageDialog(null, "No processing task selected!");
+      }
+    });
+    processingTaskPanel.add(completeTaskButton);
+
+    tabbedPane.addTab("Processing Tasks", processingTaskPanel);
+
+    // Tab 4: Packed Tasks
+    JPanel packedTaskPanel = new JPanel(null);
+    packedTaskScrollPane.setBounds(10, 10, 560, 300);
+    packedTaskPanel.add(packedTaskScrollPane);
+
+    tabbedPane.addTab("Packed Tasks", packedTaskPanel);
+
+    tabbedPane.setBounds(0, 0, W, H);
+    cp.add(tabbedPane);
+
+    rootWindow.setVisible(true);
   }
 
-  /**
-   * The controller object, used so that an interaction can be passed to the controller
-   * @param c   The controller
-   */
-
-  public void setController( CashierController c )
-  {
+  public void setController(CashierController c) {
     cont = c;
   }
 
-  /**
-   * Update the view
-   * @param modelC   The observed model
-   * @param arg      Specific args 
-   */
   @Override
-  public void update( Observable modelC, Object arg )
-  {
-    CashierModel model  = (CashierModel) modelC;
-    String      message = (String) arg;
-    theAction.setText( message );
-    Basket basket = model.getBasket();
-    if ( basket == null )
-      theOutput.setText( "Customers order" );
-    else
-      theOutput.setText( basket.getDetails() );
-    
-    theInput.requestFocus();               // Focus is here
-  }
+  public void update(Observable modelC, Object arg) {
+    CashierModel model = (CashierModel) modelC;
+    String message = (String) arg;
+    theOutput.setText("Status: " + message); // Update status message
 
+    // Update task table
+    DefaultTableModel taskTableModel = model.getTaskData();
+    if (taskTableModel != null) {
+      taskTable.setModel(taskTableModel);
+    }
+
+    // Update claimed task table
+    DefaultTableModel claimedTableModel = model.getClaimedTaskData();
+    if (claimedTableModel != null) {
+      claimedTaskTable.setModel(claimedTableModel);
+    }
+
+    // Update processing task table
+    DefaultTableModel processingTableModel = model.getProcessingTaskData();
+    if (processingTableModel != null) {
+      processingTaskTable.setModel(processingTableModel);
+    }
+
+    // Update packed task table
+    DefaultTableModel packedTableModel = model.getPackedTaskData();
+    if (packedTableModel != null) {
+      packedTaskTable.setModel(packedTableModel);
+    }
+  }
 }

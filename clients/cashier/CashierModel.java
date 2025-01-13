@@ -1,198 +1,142 @@
 package clients.cashier;
 
 import catalogue.Basket;
-import catalogue.Product;
 import debug.DEBUG;
-import middle.*;
+import middle.MiddleFactory;
+import middle.OrderProcessing;
+import middle.SharedOrderQueue;
+import middle.StockReadWriter;
 
+import javax.swing.table.DefaultTableModel;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
-/**
- * Implements the Model of the cashier client
- */
-public class CashierModel extends Observable
-{
-  private enum State { process, checked }
+public class CashierModel extends Observable {
+  private enum State {PROCESS, CHECKED}
 
-  private State       theState   = State.process;   // Current state
-  private Product     theProduct = null;            // Current product
-  private Basket      theBasket  = null;            // Bought items
+  private State theState = State.PROCESS; // Current state
+  private Basket theBasket = null;        // Current customer order
+  private final List<Basket> taskList = new ArrayList<>(); // Unclaimed tasks
+  private final List<Basket> claimedTasks = new ArrayList<>(); // Claimed tasks
+  private final List<Basket> processingTasks = new ArrayList<>(); // Processing tasks
+  private final List<Basket> packedTasks = new ArrayList<>(); // Packed tasks
 
-  private String      pn = "";                      // Product being processed
+  private StockReadWriter theStock = null;
+  private OrderProcessing theOrder = null;
 
-  private StockReadWriter theStock     = null;
-  private OrderProcessing theOrder     = null;
-
-  /**
-   * Construct the model of the Cashier
-   * @param mf The factory to create the connection objects
-   */
-
-  public CashierModel(MiddleFactory mf)
-  {
-    try                                           // 
-    {      
-      theStock = mf.makeStockReadWriter();        // Database access
-      theOrder = mf.makeOrderProcessing();        // Process order
-    } catch ( Exception e )
-    {
-      DEBUG.error("CashierModel.constructor\n%s", e.getMessage() );
+  public CashierModel(MiddleFactory mf) {
+    try {
+      theStock = mf.makeStockReadWriter(); // Fetch stock details
+      theOrder = mf.makeOrderProcessing(); // Fetch order processing
+      startOrderListening();              // Start listening for orders
+    } catch (Exception e) {
+      System.err.println("Error initializing CashierModel: " + e.getMessage());
     }
-    theState   = State.process;                  // Current state
   }
-  
-  /**
-   * Get the Basket of products
-   * @return basket
-   */
-  public Basket getBasket()
-  {
+
+  private void startOrderListening() {
+    new Thread(this::listenForOrders).start();
+  }
+
+  private void listenForOrders() {
+    try {
+      while (true) {
+        Basket incomingBasket = SharedOrderQueue.getOrder(); // Block until an order is available
+        taskList.add(incomingBasket); // Add to task list
+        setChanged();
+        notifyObservers("New order received!");
+      }
+    } catch (InterruptedException e) {
+      DEBUG.error("CashierModel.listenForOrders interrupted: %s", e.getMessage());
+    }
+  }
+
+  public Basket getBasket() {
     return theBasket;
   }
 
-  /**
-   * Check if the product is in Stock
-   * @param productNum The product number
-   */
-  public void doCheck(String productNum )
-  {
-    String theAction = "";
-    theState  = State.process;                  // State process
-    pn  = productNum.trim();                    // Product no.
-    int    amount  = 1;                         //  & quantity
-    try
-    {
-      if ( theStock.exists( pn ) )              // Stock Exists?
-      {                                         // T
-        Product pr = theStock.getDetails(pn);   //  Get details
-        if ( pr.getQuantity() >= amount )       //  In stock?
-        {                                       //  T
-          theAction =                           //   Display 
-            String.format( "%s : %7.2f (%2d) ", //
-              pr.getDescription(),              //    description
-              pr.getPrice(),                    //    price
-              pr.getQuantity() );               //    quantity     
-          theProduct = pr;                      //   Remember prod.
-          theProduct.setQuantity( amount );     //    & quantity
-          theState = State.checked;             //   OK await BUY 
-        } else {                                //  F
-          theAction =                           //   Not in Stock
-            pr.getDescription() +" not in stock";
-        }
-      } else {                                  // F Stock exists
-        theAction =                             //  Unknown
-          "Unknown product number " + pn;       //  product no.
-      }
-    } catch( StockException e )
-    {
-      DEBUG.error( "%s\n%s", 
-            "CashierModel.doCheck", e.getMessage() );
-      theAction = e.getMessage();
-    }
-    setChanged(); notifyObservers(theAction);
+  public void clearBasket() {
+    this.theBasket = null;
+    setChanged();
+    notifyObservers("Order processed. Ready for the next one.");
   }
 
-  /**
-   * Buy the product
-   */
-  public void doBuy()
-  {
-    String theAction = "";
-    int    amount  = 1;                         //  & quantity
-    try
-    {
-      if ( theState != State.checked )          // Not checked
-      {                                         //  with customer
-        theAction = "please check its availablity";
-      } else {
-        boolean stockBought =                   // Buy
-          theStock.buyStock(                    //  however
-            theProduct.getProductNum(),         //  may fail              
-            theProduct.getQuantity() );         //
-        if ( stockBought )                      // Stock bought
-        {                                       // T
-          makeBasketIfReq();                    //  new Basket ?
-          theBasket.add( theProduct );          //  Add to bought
-          theAction = "Purchased " +            //    details
-                  theProduct.getDescription();  //
-        } else {                                // F
-          theAction = "!!! Not in stock";       //  Now no stock
-        }
-      }
-    } catch( StockException e )
-    {
-      DEBUG.error( "%s\n%s", 
-            "CashierModel.doBuy", e.getMessage() );
-      theAction = e.getMessage();
-    }
-    theState = State.process;                   // All Done
-    setChanged(); notifyObservers(theAction);
-  }
-  
-  /**
-   * Customer pays for the contents of the basket
-   */
-  public void doBought()
-  {
-    String theAction = "";
-    int    amount  = 1;                       //  & quantity
-    try
-    {
-      if ( theBasket != null &&
-           theBasket.size() >= 1 )            // items > 1
-      {                                       // T
-        theOrder.newOrder( theBasket );       //  Process order
-        theBasket = null;                     //  reset
-      }                                       //
-      theAction = "Start New Order";            // New order
-      theState = State.process;               // All Done
-       theBasket = null;
-    } catch( OrderException e )
-    {
-      DEBUG.error( "%s\n%s", 
-            "CashierModel.doCancel", e.getMessage() );
-      theAction = e.getMessage();
-    }
-    theBasket = null;
-    setChanged(); notifyObservers(theAction); // Notify
+  public DefaultTableModel getTaskData() {
+    return createTableModel(taskList, "Unclaimed");
   }
 
-  /**
-   * ask for update of view callled at start of day
-   * or after system reset
-   */
-  public void askForUpdate()
-  {
-    setChanged(); notifyObservers("Welcome");
+  public DefaultTableModel getClaimedTaskData() {
+    return createTableModel(claimedTasks, "Claimed");
   }
-  
-  /**
-   * make a Basket when required
-   */
-  private void makeBasketIfReq()
-  {
-    if ( theBasket == null )
-    {
-      try
-      {
-        int uon   = theOrder.uniqueNumber();     // Unique order num.
-        theBasket = makeBasket();                //  basket list
-        theBasket.setOrderNum( uon );            // Add an order number
-      } catch ( OrderException e )
-      {
-        DEBUG.error( "Comms failure\n" +
-                     "CashierModel.makeBasket()\n%s", e.getMessage() );
-      }
+
+  public DefaultTableModel getProcessingTaskData() {
+    return createTableModel(processingTasks, "Processing");
+  }
+
+  public DefaultTableModel getPackedTaskData() {
+    return createTableModel(packedTasks, "Packed");
+  }
+
+  private DefaultTableModel createTableModel(List<Basket> list, String status) {
+    String[] columns = {"Order ID", "Items", "Total Price", "Status"};
+    Object[][] data = new Object[list.size()][columns.length];
+
+    for (int i = 0; i < list.size(); i++) {
+      Basket basket = list.get(i);
+      double total = basket.stream().mapToDouble(p -> p.getPrice() * p.getQuantity()).sum();
+      data[i][0] = basket.getOrderNum();
+      data[i][1] = basket.size(); // Number of items
+      data[i][2] = total;         // Total price
+      data[i][3] = status;        // Status
+    }
+
+    return new DefaultTableModel(data, columns);
+  }
+
+  public void claimTask(int taskIndex) {
+    if (taskIndex >= 0 && taskIndex < taskList.size()) {
+      Basket claimedTask = taskList.remove(taskIndex); // Remove from unclaimed tasks
+      claimedTasks.add(claimedTask);                  // Add to claimed tasks
+      setChanged();
+      notifyObservers("Task claimed successfully!");
+    } else {
+      setChanged();
+      notifyObservers("Invalid task selection.");
     }
   }
 
-  /**
-   * return an instance of a new Basket
-   * @return an instance of a new Basket
-   */
-  protected Basket makeBasket()
-  {
-    return new Basket();
+  public void processClaimedTask(int taskIndex) {
+    if (taskIndex >= 0 && taskIndex < claimedTasks.size()) {
+      Basket processingTask = claimedTasks.remove(taskIndex); // Remove from claimed tasks
+      processingTasks.add(processingTask);                   // Add to processing tasks
+      setChanged();
+      notifyObservers("Task moved to processing!");
+    } else {
+      setChanged();
+      notifyObservers("Invalid task selection.");
+    }
+  }
+
+  public void completeProcessingTask(int taskIndex) {
+    if (taskIndex >= 0 && taskIndex < processingTasks.size()) {
+      Basket packedTask = processingTasks.remove(taskIndex); // Remove from processing tasks
+      packedTasks.add(packedTask);                          // Add to packed tasks
+      setChanged();
+      notifyObservers("Task packed and ready for shipping!");
+    } else {
+      setChanged();
+      notifyObservers("Invalid task selection.");
+    }
+  }
+
+  public void refreshTasks() {
+    setChanged();
+    notifyObservers("Tasks refreshed.");
+  }
+
+  public void askForUpdate() {
+    setChanged();
+    notifyObservers("Welcome! Waiting for orders.");
   }
 }
-  

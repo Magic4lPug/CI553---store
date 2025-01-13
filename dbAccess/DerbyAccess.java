@@ -9,16 +9,22 @@ package dbAccess;
 class DerbyAccess extends DBAccess
 {
   private static final String URLdb =
-                 "jdbc:derby:catshop.db";
+          "jdbc:derby:catshop.db;create=true";
   private static final String DRIVER =
                  "org.apache.derby.jdbc.EmbeddedDriver";
 
   /**
    * Load the Apache Derby database driver
    */
-  public void loadDriver() throws Exception
-  {
-    Class.forName(DRIVER).newInstance();
+  public void loadDriver() throws Exception {
+    try {
+      System.out.println("Loading driver: " + DRIVER);
+      Class.forName(DRIVER).newInstance();
+      System.out.println("Driver loaded successfully.");
+    } catch (Exception e) {
+      System.err.println("Failed to load driver: " + e.getMessage());
+      throw e;
+    }
   }
 
   /**

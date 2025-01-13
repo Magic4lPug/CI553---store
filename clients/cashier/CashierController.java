@@ -1,48 +1,44 @@
+
 package clients.cashier;
 
+import javax.swing.*;
 
-/**
- * The Cashier Controller
- */
+public class CashierController {
+  private final CashierModel model;
+  private final CashierView view;
 
-public class CashierController
-{
-  private CashierModel model = null;
-  private CashierView  view  = null;
-
-  /**
-   * Constructor
-   * @param model The model 
-   * @param view  The view from which the interaction came
-   */
-  public CashierController( CashierModel model, CashierView view )
-  {
-    this.view  = view;
+  public CashierController(CashierModel model, CashierView view) {
     this.model = model;
+    this.view = view;
   }
 
-  /**
-   * Check interaction from view
-   * @param pn The product number to be checked
-   */
-  public void doCheck( String pn )
-  {
-    model.doCheck(pn);
+  public void processOrder() {
+    if (model.getBasket() != null) {
+      model.clearBasket();
+      JOptionPane.showMessageDialog(null, "Order processed successfully!");
+    } else {
+      JOptionPane.showMessageDialog(null, "No orders to process.");
+    }
   }
 
-   /**
-   * Buy interaction from view
-   */
-  public void doBuy()
-  {
-    model.doBuy();
+  // Add the refreshTasks method
+  public void refreshTasks() {
+    model.refreshTasks(); // Notify the model to refresh tasks
+    JOptionPane.showMessageDialog(null, "Tasks refreshed successfully!");
   }
-  
-   /**
-   * Bought interaction from view
-   */
-  public void doBought()
-  {
-    model.doBought();
+
+  public void claimTask(int taskIndex) {
+    model.claimTask(taskIndex);
   }
+
+  public void processClaimedTask(int taskIndex) {
+    model.processClaimedTask(taskIndex);
+  }
+
+  public void completeProcessingTask(int taskIndex) {
+    model.completeProcessingTask(taskIndex);
+  }
+
+
+
 }

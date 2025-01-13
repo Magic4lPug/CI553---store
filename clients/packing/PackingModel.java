@@ -122,31 +122,25 @@ public class PackingModel extends Observable
   /**
    * Process a packed Order
    */
-  public void doPacked()
-  {
+  public void doPacked() {
     String theAction = "";
-    try
-    {
-      Basket basket =  theBasket.get();       // Basket being packed
-      if ( basket != null )                   // T
-      {
-        theBasket.set( null );                //  packed
-        int no = basket.getOrderNum();        //  Order no
-        theOrder.informOrderPacked( no );     //  Tell system
-        theAction = "";                       //  Inform picker
-        worker.free();                        //  Can pack some more
-      } else {                                // F 
-        theAction = "No order";       //   Not packed order
+    try {
+      if (theBasket.get() != null) {        // Check if there is a basket
+        Basket basket = theBasket.get();  // Get basket being packed
+        theBasket.set(null);              // Clear current basket
+        int orderNum = basket.getOrderNum();
+        theOrder.informOrderPacked(orderNum); // Inform system order is packed
+        theAction = "Order packed and ready!";
+      } else {
+        theAction = "No order to pack.";
       }
-      setChanged(); notifyObservers(theAction);
+    } catch (OrderException e) {
+      theAction = "Error processing order: " + e.getMessage();
     }
-    catch ( OrderException e )                // Error
-    {                                         //  Of course
-      DEBUG.error( "ReceiptModel.doOk()\n%s\n",//  should not
-                            e.getMessage() ); //  happen
-    }
-    setChanged(); notifyObservers(theAction);
+    setChanged();
+    notifyObservers(theAction);
   }
+
 }
 
 
