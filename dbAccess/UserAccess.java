@@ -65,4 +65,30 @@ public class UserAccess {
             throw new StockException("SQL authenticateWithEmail: " + e.getMessage());
         }
     }
+
+    public byte[] getBasketData(String userID) throws StockException {
+        String query = "SELECT basketData FROM BasketTable WHERE userID = ?";
+        try (PreparedStatement stmt = theCon.prepareStatement(query)) {
+            stmt.setString(1, userID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBytes("basketData");
+                }
+            }
+        } catch (SQLException e) {
+            throw new StockException("SQL getBasketData: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public void saveBasketData(String userID, byte[] basketData) throws StockException {
+        String query = "REPLACE INTO BasketTable (userID, basketData) VALUES (?, ?)";
+        try (PreparedStatement stmt = theCon.prepareStatement(query)) {
+            stmt.setString(1, userID);
+            stmt.setBytes(2, basketData);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new StockException("SQL saveBasketData: " + e.getMessage());
+        }
+    }
 }

@@ -5,25 +5,31 @@ import catalogue.BasketController;
 import catalogue.Product;
 
 import javax.swing.*;
+import java.sql.Connection;
 
 public class CustomerController {
   private final CustomerModel model;
   private final CustomerView view;
-  private final CustomerProfileHandler profileHandler; // Profile handler
-  private final BasketController basketController; // Basket controller for managing the basket
+  private final CustomerProfileHandler profileHandler;
+  private final BasketController basketController;
+  private final String userID; // Unique user identifier
 
-  public CustomerController(CustomerModel model, CustomerView view) {
+  public CustomerController(CustomerModel model, CustomerView view, Connection databaseConnection, String userID) {
     this.model = model;
     this.view = view;
+    this.userID = userID;
 
     // Initialize the profile handler with user details
-    this.profileHandler = new CustomerProfileHandler("john_doe", "john.doe@example.com");
+    this.profileHandler = new CustomerProfileHandler(userID, "john.doe@example.com");
 
-    // Initialize the basket controller
-    this.basketController = new BasketController(model.getBasket());
+    // Initialize the basket controller with the model's basket and database connection
+    this.basketController = new BasketController(model.getBasket(), databaseConnection);
 
     model.addObserver(view); // Add the view as an observer
     model.fetchAllProducts(); // Fetch all products on initialization
+
+    // Load the user's basket
+    loadBasket();
   }
 
   public void doSearch(String query) {
@@ -31,7 +37,6 @@ public class CustomerController {
   }
 
   public void viewBasket() {
-    // Delegate to BasketController to show the basket view
     basketController.viewBasket();
   }
 
@@ -39,15 +44,24 @@ public class CustomerController {
     if (product != null) {
       model.addToBasket(product);
       JOptionPane.showMessageDialog(null, "Product added to basket!");
+      saveBasket(); // Save basket after adding a product
     }
   }
 
   public void checkoutBasket() {
-    // Delegate checkout to BasketController
     basketController.checkoutBasket();
+    saveBasket(); // Save basket after checkout
   }
 
   public void viewProfile() {
-    profileHandler.showProfile(); // Delegate to CustomerProfileHandler
+    profileHandler.showProfile();
+  }
+
+  public void saveBasket() {
+    basketController.saveBasket(userID);
+  }
+
+  public void loadBasket() {
+    basketController.loadBasket(userID);
   }
 }

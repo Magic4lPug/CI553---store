@@ -11,6 +11,7 @@ class Setup {
           "DROP TABLE IF EXISTS StockTable;",
           "DROP TABLE IF EXISTS ProductTable;",
           "DROP TABLE IF EXISTS UserTable;",
+          "DROP TABLE IF EXISTS BasketTable;",
 
           "CREATE TABLE ProductTable (" +
                   "productNo TEXT PRIMARY KEY," +
@@ -23,12 +24,19 @@ class Setup {
                   "stockLevel INTEGER," +
                   "FOREIGN KEY (productNo) REFERENCES ProductTable(productNo));",
 
+
           "CREATE TABLE UserTable (" +
                   "userID TEXT PRIMARY KEY," +
                   "username TEXT NOT NULL," +
                   "password TEXT NOT NULL," +
                   "email TEXT," +
                   "role TEXT);",
+
+          "CREATE TABLE BasketTable (" +
+                  "userID TEXT NOT NULL," +
+                  "basketData BLOB," +
+                  "PRIMARY KEY (userID)," +
+                  "FOREIGN KEY (userID) REFERENCES UserTable(userID));",
 
           // Insert products
           "INSERT INTO ProductTable VALUES ('0001', '40 inch LED HD TV', 'images/pic0001.jpg', 269.00);",
