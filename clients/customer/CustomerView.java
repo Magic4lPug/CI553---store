@@ -9,12 +9,9 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-/**
- * Implements the updated Customer view.
- */
 public class CustomerView implements Observer {
-  private static final int H = 500; // Height of window pixels
-  private static final int W = 600; // Width of window pixels
+  private static final int H = 550; // Height of window pixels
+  private static final int W = 700; // Width of window pixels
 
   private final JLabel pageTitle = new JLabel("Available Products");
   private final JTextField searchField = new JTextField(20);
@@ -24,7 +21,7 @@ public class CustomerView implements Observer {
   private final JButton addToBasketButton = new JButton("Add to Basket");
   private final JButton basketButton = new JButton("🛒 Basket");
   private final JLabel theAction = new JLabel();
-  private final JButton checkoutButton = new JButton("Checkout");
+  private final JButton profileButton = new JButton("Profile"); // New Profile button
 
   private CustomerController cont;
 
@@ -35,33 +32,43 @@ public class CustomerView implements Observer {
     rootWindow.setSize(W, H);
     rootWindow.setLocation(x, y);
 
-    pageTitle.setBounds(20, 10, 200, 20);
+    // Profile Button - Top left
+    profileButton.setBounds(20, 10, 100, 30); // Larger and better spaced
+    profileButton.addActionListener(e -> cont.viewProfile());
+    cp.add(profileButton);
+
+    // Page Title - Centered
+    pageTitle.setFont(new Font("Arial", Font.BOLD, 18)); // Bigger and bold title
+    pageTitle.setBounds(W / 2 - 100, 10, 200, 30);
+    pageTitle.setHorizontalAlignment(SwingConstants.CENTER);
     cp.add(pageTitle);
 
-    searchField.setBounds(20, 40, 300, 30);
+    // Search Field and Button
+    searchField.setBounds(20, 60, 400, 30); // Wider search bar
     cp.add(searchField);
 
-    searchButton.setBounds(330, 40, 100, 30);
+    searchButton.setBounds(430, 60, 100, 30); // Positioned next to the search bar
     searchButton.addActionListener(e -> cont.doSearch(searchField.getText()));
     cp.add(searchButton);
 
-    basketButton.setBounds(500, 10, 80, 30);
-    basketButton.addActionListener(e -> cont.viewBasket());
+    // Basket Button
+    basketButton.setBounds(550, 60, 100, 30); // Aligned to the right
+    basketButton.addActionListener(e -> cont.viewBasket()); // Redirect to BasketView
     cp.add(basketButton);
 
-    productScrollPane.setBounds(20, 80, 560, 300);
+    // Product Table
+    productScrollPane.setBounds(20, 110, 660, 300); // Centered and larger
     cp.add(productScrollPane);
 
-    theAction.setBounds(20, 390, 560, 30);
+    // Action Label
+    theAction.setBounds(20, 420, 660, 20); // Placed below the table
+    theAction.setHorizontalAlignment(SwingConstants.CENTER);
     cp.add(theAction);
 
-    addToBasketButton.setBounds(20, 400, 150, 30);
+    // Add to Basket Button
+    addToBasketButton.setBounds(150, 450, 150, 40); // Center-left
     addToBasketButton.addActionListener(e -> cont.addToBasket(getSelectedProduct()));
     cp.add(addToBasketButton);
-
-    checkoutButton.setBounds(200, 400, 150, 30);
-    checkoutButton.addActionListener(e -> cont.checkoutBasket());
-    cp.add(checkoutButton);
 
     rootWindow.setVisible(true);
   }
@@ -83,7 +90,6 @@ public class CustomerView implements Observer {
       }
     }
   }
-
 
   private void showError(String errorMessage) {
     JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);

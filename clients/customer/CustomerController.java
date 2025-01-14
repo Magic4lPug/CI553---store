@@ -1,6 +1,7 @@
 package clients.customer;
 
 import catalogue.Basket;
+import catalogue.BasketController;
 import catalogue.Product;
 
 import javax.swing.*;
@@ -8,36 +9,30 @@ import javax.swing.*;
 public class CustomerController {
   private final CustomerModel model;
   private final CustomerView view;
+  private final CustomerProfileHandler profileHandler; // Profile handler
+  private final BasketController basketController; // Basket controller for managing the basket
 
   public CustomerController(CustomerModel model, CustomerView view) {
     this.model = model;
     this.view = view;
 
+    // Initialize the profile handler with user details
+    this.profileHandler = new CustomerProfileHandler("john_doe", "john.doe@example.com");
+
+    // Initialize the basket controller
+    this.basketController = new BasketController(model.getBasket());
+
     model.addObserver(view); // Add the view as an observer
     model.fetchAllProducts(); // Fetch all products on initialization
   }
-
 
   public void doSearch(String query) {
     model.searchProducts(query);
   }
 
   public void viewBasket() {
-    Basket basket = model.getBasket();
-    if (basket.isEmpty()) {
-      JOptionPane.showMessageDialog(null, "Your basket is empty.", "Basket", JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
-
-    StringBuilder basketDetails = new StringBuilder("Your Basket:\n\n");
-    for (Product product : basket) {
-      basketDetails.append(String.format("Product: %s (%d units) - $%.2f\n",
-              product.getDescription(),
-              product.getQuantity(),
-              product.getPrice() * product.getQuantity()));
-    }
-
-    JOptionPane.showMessageDialog(null, basketDetails.toString(), "Basket", JOptionPane.INFORMATION_MESSAGE);
+    // Delegate to BasketController to show the basket view
+    basketController.viewBasket();
   }
 
   public void addToBasket(Product product) {
@@ -48,16 +43,11 @@ public class CustomerController {
   }
 
   public void checkoutBasket() {
-    if (model.getBasket().isEmpty()) {
-      JOptionPane.showMessageDialog(null, "Your basket is empty. Add items to the basket before checking out.");
-      return;
-    }
+    // Delegate checkout to BasketController
+    basketController.checkoutBasket();
+  }
 
-    boolean success = model.checkoutBasket();
-    if (success) {
-      JOptionPane.showMessageDialog(null, "Checkout successful! Your order has been sent to the cashier.");
-    } else {
-      JOptionPane.showMessageDialog(null, "Checkout failed. Please try again later.");
-    }
+  public void viewProfile() {
+    profileHandler.showProfile(); // Delegate to CustomerProfileHandler
   }
 }
