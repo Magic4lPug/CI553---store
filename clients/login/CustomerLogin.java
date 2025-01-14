@@ -10,7 +10,6 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 
 public class CustomerLogin extends Application {
 
@@ -19,8 +18,8 @@ public class CustomerLogin extends Application {
         primaryStage.setTitle("Customer Login");
 
         // Create UI Elements
-        Label usernameLabel = new Label("Username:");
-        TextField usernameField = new TextField();
+        Label loginLabel = new Label("Username/Email:");
+        TextField loginField = new TextField();
 
         Label passwordLabel = new Label("Password:");
         PasswordField passwordField = new PasswordField();
@@ -30,14 +29,14 @@ public class CustomerLogin extends Application {
 
         // Add Action for Login Button
         loginButton.setOnAction(e -> {
-            String username = usernameField.getText();
+            String login = loginField.getText();
             String password = passwordField.getText();
-            if (authenticateCustomer(username, password)) {
+            if (authenticateCustomer(login, password)) {
                 System.out.println("Authentication successful. Launching CustomerClient.");
                 primaryStage.close();
                 CustomerClient.main(new String[]{}); // Open Customer Client
             } else {
-                showAlert("Authentication Failed", "Invalid username or password.");
+                showAlert("Authentication Failed", "Invalid username/email or password.");
             }
         });
 
@@ -51,8 +50,8 @@ public class CustomerLogin extends Application {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.add(usernameLabel, 0, 0);
-        grid.add(usernameField, 1, 0);
+        grid.add(loginLabel, 0, 0);
+        grid.add(loginField, 1, 0);
         grid.add(passwordLabel, 0, 1);
         grid.add(passwordField, 1, 1);
         grid.add(loginButton, 0, 2);
@@ -64,12 +63,20 @@ public class CustomerLogin extends Application {
         primaryStage.show();
     }
 
-    private boolean authenticateCustomer(String username, String password) {
+    private boolean authenticateCustomer(String login, String password) {
         try {
             DBAccessFactory.setAction("");
             Connection connection = (new DBAccessFactory()).getNewDBAccess().getConnection();
             UserAccess userAccess = new UserAccess(connection);
-            return userAccess.authenticate(username, password);
+
+            // Check if login is email or username and authenticate accordingly
+            if (login.contains("@")) {
+                // Login as email
+                return userAccess.authenticateWithEmail(login, password);
+            } else {
+                // Login as username
+                return userAccess.authenticate(login, password);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return false;

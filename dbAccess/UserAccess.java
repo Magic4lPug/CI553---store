@@ -52,4 +52,17 @@ public class UserAccess {
             throw new StockException("SQL createUser: " + e.getMessage());
         }
     }
+
+    public boolean authenticateWithEmail(String email, String password) throws StockException {
+        String query = "SELECT 1 FROM UserTable WHERE email = ? AND password = ?";
+        try (PreparedStatement stmt = theCon.prepareStatement(query)) { // Use theCon instead of connection
+            stmt.setString(1, email);
+            stmt.setString(2, password);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new StockException("SQL authenticateWithEmail: " + e.getMessage());
+        }
+    }
 }

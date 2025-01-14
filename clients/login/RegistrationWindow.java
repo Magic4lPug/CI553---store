@@ -50,6 +50,11 @@ public class RegistrationWindow extends Application {
                 return;
             }
 
+            if (!isValidEmail(email)) {
+                showAlert("Error", "Invalid email address. Please enter a valid email (e.g., example@domain.com).");
+                return;
+            }
+
             try {
                 DBAccessFactory.setAction("");
                 Connection connection = (new DBAccessFactory()).getNewDBAccess().getConnection();
@@ -93,6 +98,10 @@ public class RegistrationWindow extends Application {
         Scene scene = new Scene(grid, 350, 250);
         registerStage.setScene(scene);
         registerStage.show();
+    }
+
+    private boolean isValidEmail(String email) {
+        return email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
     }
 
     private void showAlert(String title, String message) {
