@@ -46,13 +46,26 @@ public class CustomerController {
     }
   }
 
-  public void addToBasket(Product product) {
-    if (product != null) {
-      model.addToBasket(product);
-      JOptionPane.showMessageDialog(null, "Product added to basket!");
-      saveBasket();
+  public void addToBasket(Product product, int quantity) {
+    if (product != null && quantity > 0) {
+      Product productToAdd = new Product(
+              product.getProductNum(),
+              product.getDescription(),
+              product.getPrice(),
+              quantity // Add the specified quantity
+      );
+      model.addToBasket(productToAdd);
+      JOptionPane.showMessageDialog(null, "Added " + quantity + " item(s) to basket!");
+      saveBasket(); // Save the updated basket
+    } else {
+      JOptionPane.showMessageDialog(null,
+              "Invalid quantity. Please ensure it's greater than 0.",
+              "Error",
+              JOptionPane.ERROR_MESSAGE);
     }
   }
+
+
 
   public void checkoutBasket() {
     if (basketController != null) {

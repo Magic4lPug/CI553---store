@@ -67,7 +67,37 @@ public class CustomerView implements Observer {
 
     // Add to Basket Button
     addToBasketButton.setBounds(150, 450, 150, 40); // Center-left
-    addToBasketButton.addActionListener(e -> cont.addToBasket(getSelectedProduct()));
+    addToBasketButton.addActionListener(e -> {
+      Product selectedProduct = getSelectedProduct();
+      if (selectedProduct != null) {
+        // Show quantity selection dialog
+        String quantityStr = JOptionPane.showInputDialog(null,
+                "Enter quantity to add to basket (Available: " + selectedProduct.getQuantity() + "):",
+                "Select Quantity",
+                JOptionPane.PLAIN_MESSAGE);
+
+        if (quantityStr != null) {
+          try {
+            int quantity = Integer.parseInt(quantityStr);
+            if (quantity > 0 && quantity <= selectedProduct.getQuantity()) {
+              // Pass the product and quantity to the controller
+              cont.addToBasket(selectedProduct, quantity);
+            } else {
+              JOptionPane.showMessageDialog(null,
+                      "Invalid quantity. Please enter a number between 1 and " + selectedProduct.getQuantity() + ".",
+                      "Invalid Input",
+                      JOptionPane.ERROR_MESSAGE);
+            }
+          } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Invalid input. Please enter a valid number.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+          }
+        }
+      }
+    });
+
     cp.add(addToBasketButton);
 
     rootWindow.setVisible(true);
