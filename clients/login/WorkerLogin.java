@@ -1,56 +1,63 @@
 package clients.login;
 
-import javax.swing.*;
-import java.awt.*;
+import clients.cashier.CashierClient;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
 
-public class WorkerLogin {
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(WorkerLogin::displayLogin);
-    }
+public class WorkerLogin extends Application {
 
-    private static void displayLogin() {
-        JFrame frame = new JFrame("Worker Login");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300, 150);
-        frame.setLayout(new GridBagLayout());
-        frame.setLocation(500, 100);
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Worker Login");
 
-        JLabel passwordLabel = new JLabel("Worker Password:");
-        JPasswordField passwordField = new JPasswordField(15);
+        // Create UI Elements
+        Label passwordLabel = new Label("Worker Password:");
+        PasswordField passwordField = new PasswordField();
 
-        JButton loginButton = new JButton("Login");
+        Button loginButton = new Button("Login");
 
-        loginButton.addActionListener(e -> {
-            String password = new String(passwordField.getPassword());
-
+        // Add Action for Login Button
+        loginButton.setOnAction(e -> {
+            String password = passwordField.getText();
             if (authenticateWorker(password)) {
-                frame.dispose();
-                clients.cashier.CashierClient.main(new String[]{}); // Open Worker Client
+                primaryStage.close();
+                CashierClient.main(new String[]{}); // Open Worker Client
             } else {
-                JOptionPane.showMessageDialog(frame, "Invalid password.");
+                showAlert("Authentication Failed", "Invalid worker password.");
             }
         });
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        // Create Layout
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.add(passwordLabel, 0, 0);
+        grid.add(passwordField, 1, 0);
+        grid.add(loginButton, 0, 1, 2, 1);
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        frame.add(passwordLabel, gbc);
-
-        gbc.gridx = 1;
-        frame.add(passwordField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 2;
-        frame.add(loginButton, gbc);
-
-        frame.setVisible(true);
+        // Set Scene
+        Scene scene = new Scene(grid, 300, 150);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
-    private static boolean authenticateWorker(String password) {
+    private boolean authenticateWorker(String password) {
         // Replace with your worker authentication logic
         return "worker123".equals(password);
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }

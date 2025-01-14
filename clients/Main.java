@@ -2,29 +2,23 @@ package clients;
 
 import clients.login.CustomerLogin;
 import clients.login.WorkerLogin;
+import javafx.application.Application;
+import javafx.stage.Stage;
 
-import javax.swing.*;
+public class Main extends Application {
 
-public class Main {
+  @Override
+  public void start(Stage primaryStage) {
+    // Create and show the Customer Login window
+    Stage customerLoginStage = new Stage();
+    new CustomerLogin().start(customerLoginStage);
+
+    // Create and show the Worker Login window
+    Stage workerLoginStage = new Stage();
+    new WorkerLogin().start(workerLoginStage);
+  }
+
   public static void main(String[] args) {
-    SwingUtilities.invokeLater(() -> {
-      // Launch the customer and worker login windows
-      startCustomerLogin();
-      startWorkerLogin();
-    });
-  }
-
-  /**
-   * Launch the Customer Login window.
-   */
-  private static void startCustomerLogin() {
-    CustomerLogin.main(new String[]{}); // Open the Customer Login window
-  }
-
-  /**
-   * Launch the Worker Login window.
-   */
-  private static void startWorkerLogin() {
-    WorkerLogin.main(new String[]{}); // Open the Worker Login window
+    launch(args); // Launch JavaFX application
   }
 }

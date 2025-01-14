@@ -1,70 +1,70 @@
 package clients.login;
 
-import javax.swing.*;
-import java.awt.*;
+import clients.customer.CustomerClient;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
 
-public class CustomerLogin {
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(CustomerLogin::displayLogin);
-    }
+public class CustomerLogin extends Application {
 
-    private static void displayLogin() {
-        JFrame frame = new JFrame("Customer Login");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300, 200);
-        frame.setLayout(new GridBagLayout());
-        frame.setLocation(100, 100);
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Customer Login");
 
-        JLabel usernameLabel = new JLabel("Username:");
-        JTextField usernameField = new JTextField(15);
+        // Create UI Elements
+        Label usernameLabel = new Label("Username:");
+        TextField usernameField = new TextField();
 
-        JLabel passwordLabel = new JLabel("Password:");
-        JPasswordField passwordField = new JPasswordField(15);
+        Label passwordLabel = new Label("Password:");
+        PasswordField passwordField = new PasswordField();
 
-        JButton loginButton = new JButton("Login");
+        Button loginButton = new Button("Login");
 
-        loginButton.addActionListener(e -> {
-            System.out.println("Login button clicked.");
+        // Add Action for Login Button
+        loginButton.setOnAction(e -> {
             String username = usernameField.getText();
-            String password = new String(passwordField.getPassword());
+            String password = passwordField.getText();
             if (authenticateCustomer(username, password)) {
                 System.out.println("Authentication successful. Launching CustomerClient.");
-                frame.dispose();
-                clients.customer.CustomerClient.main(new String[]{}); // Open Customer Client
+                primaryStage.close();
+                CustomerClient.main(new String[]{}); // Open Customer Client
             } else {
-                System.out.println("Authentication failed.");
-                JOptionPane.showMessageDialog(frame, "Invalid username or password.");
+                showAlert("Authentication Failed", "Invalid username or password.");
             }
         });
 
+        // Create Layout
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.add(usernameLabel, 0, 0);
+        grid.add(usernameField, 1, 0);
+        grid.add(passwordLabel, 0, 1);
+        grid.add(passwordField, 1, 1);
+        grid.add(loginButton, 0, 2, 2, 1);
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        frame.add(usernameLabel, gbc);
-
-        gbc.gridx = 1;
-        frame.add(usernameField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        frame.add(passwordLabel, gbc);
-
-        gbc.gridx = 1;
-        frame.add(passwordField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        frame.add(loginButton, gbc);
-
-        frame.setVisible(true);
+        // Set Scene
+        Scene scene = new Scene(grid, 300, 200);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
-    private static boolean authenticateCustomer(String username, String password) {
+    private boolean authenticateCustomer(String username, String password) {
         // Replace with your customer authentication logic
         return "customer1".equals(username) && "password1".equals(password);
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }
