@@ -25,10 +25,11 @@ public class CustomerController {
     // Initialize the basket controller with the model's basket, database connection, and userID
     this.basketController = new BasketController(model.getBasket(), databaseConnection, userID);
 
-    model.addObserver(view); // Add the view as an observer
-    model.fetchAllProducts(); // Fetch all products on initialization
+    // Add the view as an observer
+    model.addObserver(view);
 
-    // Load the user's basket
+    // Fetch all products and load the user's basket
+    model.fetchAllProducts();
     loadBasket();
   }
 
@@ -37,34 +38,59 @@ public class CustomerController {
   }
 
   public void viewBasket() {
-    basketController.viewBasket();
+    // Ensure the basket controller and view are initialized correctly
+    if (basketController != null) {
+      basketController.viewBasket();
+    } else {
+      JOptionPane.showMessageDialog(null, "Basket is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   public void addToBasket(Product product) {
     if (product != null) {
       model.addToBasket(product);
       JOptionPane.showMessageDialog(null, "Product added to basket!");
-      saveBasket(); // Save basket after adding a product
+      saveBasket();
     }
   }
 
   public void checkoutBasket() {
-    basketController.checkoutBasket(); // `userID` now passed during initialization
+    if (basketController != null) {
+      basketController.checkoutBasket();
+    } else {
+      JOptionPane.showMessageDialog(null, "Basket is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   public void removeItemFromBasket(Product product) {
-    basketController.removeFromBasket(product); // `userID` now managed internally in BasketController
+    if (basketController != null) {
+      basketController.removeFromBasket(product);
+    } else {
+      JOptionPane.showMessageDialog(null, "Basket is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   public void viewProfile() {
-    profileHandler.showProfile();
+    if (profileHandler != null) {
+      profileHandler.showProfile();
+    } else {
+      JOptionPane.showMessageDialog(null, "Profile handler is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   public void saveBasket() {
-    basketController.saveBasket(); // `userID` now managed internally in BasketController
+    if (basketController != null) {
+      basketController.saveBasket();
+    } else {
+      JOptionPane.showMessageDialog(null, "Basket is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   public void loadBasket() {
-    basketController.loadBasket(); // `userID` now managed internally in BasketController
+    if (basketController != null) {
+      basketController.loadBasket();
+    } else {
+      JOptionPane.showMessageDialog(null, "Basket is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
   }
 }

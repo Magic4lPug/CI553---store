@@ -82,7 +82,7 @@ public class UserAccess {
     }
 
     public void saveBasketData(String userID, byte[] basketData) throws StockException {
-        String query = "REPLACE INTO BasketTable (userID, basketData) VALUES (?, ?)";
+        String query = "INSERT OR REPLACE INTO BasketTable (userID, basketData) VALUES (?, ?)";
         try (PreparedStatement stmt = theCon.prepareStatement(query)) {
             stmt.setString(1, userID);
             stmt.setBytes(2, basketData);
@@ -91,4 +91,5 @@ public class UserAccess {
             throw new StockException("SQL saveBasketData: " + e.getMessage());
         }
     }
+
 }

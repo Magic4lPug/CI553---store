@@ -34,7 +34,7 @@ public class CustomerLogin extends Application {
             if (authenticateCustomer(login, password)) {
                 System.out.println("Authentication successful. Launching CustomerClient.");
                 primaryStage.close();
-                CustomerClient.main(new String[]{}); // Open Customer Client
+                launchCustomerClient(login); // Pass userID (login)
             } else {
                 showAlert("Authentication Failed", "Invalid username/email or password.");
             }
@@ -89,6 +89,11 @@ public class CustomerLogin extends Application {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void launchCustomerClient(String userID) {
+        // Launch CustomerClient with the authenticated userID
+        CustomerClient.launchWithUser(userID);
     }
 
     public static void main(String[] args) {

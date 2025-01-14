@@ -11,7 +11,7 @@ public class BasketController {
     private final Basket basket;
     private final BasketView basketView;
     private final Connection databaseConnection;
-    private final String userID; // Add userID to the controller
+    private final String userID; // Unique user identifier for basket operations
 
     public BasketController(Basket basket, Connection databaseConnection, String userID) {
         this.basket = basket;
@@ -27,39 +27,30 @@ public class BasketController {
         basketView.show();
     }
 
-    // Save the basket to the database for the given user
     public void saveBasket() {
         try {
-            UserAccess userAccess = new UserAccess(databaseConnection); // Use the provided database connection
-            // Serialize the basket into bytes
+            UserAccess userAccess = new UserAccess(databaseConnection);
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(bos);
             oos.writeObject(basket);
             oos.flush();
             byte[] basketData = bos.toByteArray();
-
-            // Save serialized data
-            userAccess.saveBasketData(userID, basketData);
+            userAccess.saveBasketData(userID, basketData); // Save basket for the current user
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Failed to save basket: " + e.getMessage());
         }
     }
 
-    // Load the basket from the database for the given user
     public void loadBasket() {
         try {
-            UserAccess userAccess = new UserAccess(databaseConnection); // Use the provided database connection
+            UserAccess userAccess = new UserAccess(databaseConnection);
             byte[] basketData = userAccess.getBasketData(userID);
-
             if (basketData != null) {
-                // Deserialize the basket data
                 ByteArrayInputStream bis = new ByteArrayInputStream(basketData);
                 ObjectInputStream ois = new ObjectInputStream(bis);
                 Basket loadedBasket = (Basket) ois.readObject();
-
-                // Update the basket
                 basket.clear();
-                basket.addAll(loadedBasket);
+                basket.addAll(loadedBasket); // Load basket for the current user
                 updateBasketView();
             } else {
                 JOptionPane.showMessageDialog(null, "No saved basket found for this user.");
@@ -69,7 +60,6 @@ public class BasketController {
         }
     }
 
-    // Checkout the basket
     public void checkoutBasket() {
         if (basket.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Your basket is empty. Add items to checkout.");
@@ -77,26 +67,24 @@ public class BasketController {
             try {
                 SharedOrderQueue.addOrder(new Basket(basket)); // Send a copy of the basket to the cashier
                 basket.clear(); // Clear the basket after checkout
-                saveBasket(); // Update the database to reflect the cleared basket
+                saveBasket(); // Update database to reflect cleared basket
                 JOptionPane.showMessageDialog(null, "Checkout successful! Your order has been sent to the cashier.");
-                updateBasketView(); // Update the view after clearing the basket
+                updateBasketView();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Checkout failed: " + e.getMessage());
             }
         }
     }
 
-    // Remove an item from the basket and save changes
     public void removeFromBasket(Product product) {
         if (basket.contains(product)) {
-            basket.remove(product);
-            saveBasket(); // Save updated basket after removal
+            basket.remove(product); // Remove the product from the basket
+            saveBasket(); // Save the updated basket for the current user
             updateBasketView();
         }
     }
 
-    // Update the basket view
     public void updateBasketView() {
-        basketView.updateBasketView(); // Refresh the table in BasketView
+        basketView.updateBasketView(); // Refresh the basket view
     }
 }
