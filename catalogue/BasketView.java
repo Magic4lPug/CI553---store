@@ -7,9 +7,11 @@ public class BasketView {
     private final Basket basket;
     private final DefaultTableModel tableModel;
     private final JFrame frame;
+    private final BasketController controller; // Reference to BasketController
 
-    public BasketView(Basket basket, BasketController controller) {
+    public BasketView(Basket basket, BasketController controller, String userID) {
         this.basket = basket;
+        this.controller = controller;
 
         // Create the frame
         frame = new JFrame("Your Basket");
@@ -35,9 +37,11 @@ public class BasketView {
         removeButton.addActionListener(e -> {
             int selectedRow = basketTable.getSelectedRow();
             if (selectedRow != -1) {
-                Product product = basket.get(selectedRow);
-                basket.remove(product); // Remove from basket
-                controller.updateBasketView(); // Refresh the view
+                String productNo = (String) tableModel.getValueAt(selectedRow, 0);
+                Product productToRemove = findProductInBasket(productNo);
+                if (productToRemove != null) {
+                    controller.removeFromBasket(productToRemove); // Remove from both UI and database
+                }
             } else {
                 JOptionPane.showMessageDialog(frame, "Please select an item to remove.");
             }
@@ -47,7 +51,7 @@ public class BasketView {
         // Create the Checkout button
         JButton checkoutButton = new JButton("Checkout");
         checkoutButton.setBounds(410, 240, 150, 30);
-        checkoutButton.addActionListener(e -> controller.checkoutBasket());
+        checkoutButton.addActionListener(e -> controller.checkoutBasket()); // Clear the basket and save changes
         frame.add(checkoutButton);
     }
 
@@ -72,5 +76,15 @@ public class BasketView {
                     product.getPrice() * product.getQuantity()
             });
         }
+    }
+
+    // Find a product in the basket by product number
+    private Product findProductInBasket(String productNo) {
+        for (Product product : basket) {
+            if (product.getProductNum().equals(productNo)) {
+                return product;
+            }
+        }
+        return null; // Product not found
     }
 }

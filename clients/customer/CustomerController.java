@@ -22,8 +22,8 @@ public class CustomerController {
     // Initialize the profile handler with user details
     this.profileHandler = new CustomerProfileHandler(userID, "john.doe@example.com");
 
-    // Initialize the basket controller with the model's basket and database connection
-    this.basketController = new BasketController(model.getBasket(), databaseConnection);
+    // Initialize the basket controller with the model's basket, database connection, and userID
+    this.basketController = new BasketController(model.getBasket(), databaseConnection, userID);
 
     model.addObserver(view); // Add the view as an observer
     model.fetchAllProducts(); // Fetch all products on initialization
@@ -49,8 +49,11 @@ public class CustomerController {
   }
 
   public void checkoutBasket() {
-    basketController.checkoutBasket();
-    saveBasket(); // Save basket after checkout
+    basketController.checkoutBasket(); // `userID` now passed during initialization
+  }
+
+  public void removeItemFromBasket(Product product) {
+    basketController.removeFromBasket(product); // `userID` now managed internally in BasketController
   }
 
   public void viewProfile() {
@@ -58,10 +61,10 @@ public class CustomerController {
   }
 
   public void saveBasket() {
-    basketController.saveBasket(userID);
+    basketController.saveBasket(); // `userID` now managed internally in BasketController
   }
 
   public void loadBasket() {
-    basketController.loadBasket(userID);
+    basketController.loadBasket(); // `userID` now managed internally in BasketController
   }
 }

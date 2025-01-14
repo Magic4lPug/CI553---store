@@ -11,11 +11,13 @@ public class BasketController {
     private final Basket basket;
     private final BasketView basketView;
     private final Connection databaseConnection;
+    private final String userID; // Add userID to the controller
 
-    public BasketController(Basket basket, Connection databaseConnection) {
+    public BasketController(Basket basket, Connection databaseConnection, String userID) {
         this.basket = basket;
         this.databaseConnection = databaseConnection;
-        this.basketView = new BasketView(basket, this);
+        this.userID = userID; // Initialize userID
+        this.basketView = new BasketView(basket, this, userID); // Pass userID to BasketView
         updateBasketView(); // Ensure the view is initialized with current basket contents
     }
 
@@ -26,7 +28,7 @@ public class BasketController {
     }
 
     // Save the basket to the database for the given user
-    public void saveBasket(String userID) {
+    public void saveBasket() {
         try {
             UserAccess userAccess = new UserAccess(databaseConnection); // Use the provided database connection
             // Serialize the basket into bytes
@@ -44,7 +46,7 @@ public class BasketController {
     }
 
     // Load the basket from the database for the given user
-    public void loadBasket(String userID) {
+    public void loadBasket() {
         try {
             UserAccess userAccess = new UserAccess(databaseConnection); // Use the provided database connection
             byte[] basketData = userAccess.getBasketData(userID);
@@ -75,11 +77,21 @@ public class BasketController {
             try {
                 SharedOrderQueue.addOrder(new Basket(basket)); // Send a copy of the basket to the cashier
                 basket.clear(); // Clear the basket after checkout
+                saveBasket(); // Update the database to reflect the cleared basket
                 JOptionPane.showMessageDialog(null, "Checkout successful! Your order has been sent to the cashier.");
                 updateBasketView(); // Update the view after clearing the basket
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Checkout failed: " + e.getMessage());
             }
+        }
+    }
+
+    // Remove an item from the basket and save changes
+    public void removeFromBasket(Product product) {
+        if (basket.contains(product)) {
+            basket.remove(product);
+            saveBasket(); // Save updated basket after removal
+            updateBasketView();
         }
     }
 
