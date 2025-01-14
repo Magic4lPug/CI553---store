@@ -12,9 +12,18 @@ import java.sql.SQLException;
 
 public class CustomerClient {
 
-  public static void launchWithUser(String userID) {
-    String stockURL = Names.STOCK_R;
+  private static JFrame customerWindow = null; // Singleton instance of the main window
+  private static String currentUserID = null; // Track the currently logged-in user
 
+  public static void launchWithUser(String userID) {
+    if (customerWindow != null && customerWindow.isVisible()) {
+      System.out.println("Customer window already open. Preventing duplicate.");
+      return; // Prevent opening a new window if one already exists
+    }
+
+    currentUserID = userID; // Set the current user ID
+
+    String stockURL = Names.STOCK_R;
     RemoteMiddleFactory mrf = new RemoteMiddleFactory();
     mrf.setStockRInfo(stockURL);
     Connection databaseConnection = initializeDatabaseConnection();
@@ -22,19 +31,13 @@ public class CustomerClient {
     displayGUI(mrf, databaseConnection, userID);
   }
 
-  public static void main(String[] args) {
-    String stockURL = args.length < 1
-            ? Names.STOCK_R
-            : args[0];
-
-    RemoteMiddleFactory mrf = new RemoteMiddleFactory();
-    mrf.setStockRInfo(stockURL);
-    Connection databaseConnection = initializeDatabaseConnection();
-
-    String userID = loginAndGetUserID(databaseConnection); // Dynamically retrieve the userID
-    if (userID != null) {
-      displayGUI(mrf, databaseConnection, userID);
+  public static void clearSession() {
+    currentUserID = null; // Reset the current user ID
+    if (customerWindow != null) {
+      customerWindow.dispose(); // Ensure the window is disposed of
     }
+    customerWindow = null; // Reset the singleton instance
+    System.out.println("CustomerClient session cleared.");
   }
 
   private static Connection initializeDatabaseConnection() {
@@ -49,56 +52,19 @@ public class CustomerClient {
     }
   }
 
-  private static String loginAndGetUserID(Connection databaseConnection) {
-    String[] credentials = showLoginDialog();
-    if (credentials == null) return null;
-
-    try {
-      UserAccess userAccess = new UserAccess(databaseConnection);
-      boolean authenticated = userAccess.authenticate(credentials[0], credentials[1]);
-
-      if (authenticated) {
-        System.out.println("Login successful!");
-        return credentials[0]; // Use username as userID
-      } else {
-        JOptionPane.showMessageDialog(null, "Invalid username or password.");
-        return null;
-      }
-    } catch (Exception e) {
-      JOptionPane.showMessageDialog(null, "Login failed: " + e.getMessage());
-      return null;
-    }
-  }
-
-  private static String[] showLoginDialog() {
-    JTextField usernameField = new JTextField();
-    JPasswordField passwordField = new JPasswordField();
-    Object[] message = {
-            "Username:", usernameField,
-            "Password:", passwordField
-    };
-
-    int option = JOptionPane.showConfirmDialog(null, message, "Login", JOptionPane.OK_CANCEL_OPTION);
-    if (option == JOptionPane.OK_OPTION) {
-      return new String[]{usernameField.getText(), new String(passwordField.getPassword())};
-    } else {
-      return null;
-    }
-  }
-
   private static void displayGUI(MiddleFactory mf, Connection databaseConnection, String userID) {
-    JFrame window = new JFrame();
-    window.setTitle("Customer Client (MVC RMI)");
-    window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    if (customerWindow == null) {
+      customerWindow = new JFrame(); // Initialize only if null
+    }
+    customerWindow.setTitle("Customer Client (MVC RMI)");
+    customerWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
     CustomerModel model = new CustomerModel(mf);
-    CustomerView view = new CustomerView(window, 0, 0);
-    CustomerController cont = new CustomerController(model, view, databaseConnection, userID, window);
+    CustomerView view = new CustomerView(customerWindow, 0, 0);
+    CustomerController cont = new CustomerController(model, view, databaseConnection, userID, customerWindow);
     view.setController(cont);
 
     model.addObserver(view);
-    window.setVisible(true);
+    customerWindow.setVisible(true);
   }
-
-
 }

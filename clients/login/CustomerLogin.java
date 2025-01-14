@@ -69,19 +69,28 @@ public class CustomerLogin extends Application {
             Connection connection = (new DBAccessFactory()).getNewDBAccess().getConnection();
             UserAccess userAccess = new UserAccess(connection);
 
-            // Check if login is email or username and authenticate accordingly
-            if (login.contains("@")) {
-                // Login as email
-                return userAccess.authenticateWithEmail(login, password);
+            // Fetch the userID regardless of login type
+            String userID = userAccess.getUserIDByLogin(login, password);
+
+            if (userID != null) {
+                launchCustomerClient(userID); // Use userID for operations
+                return true;
             } else {
-                // Login as username
-                return userAccess.authenticate(login, password);
+                showAlert("Authentication Failed", "Invalid username/email or password.");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            showAlert("Error", "An error occurred during authentication.");
         }
+        return false;
     }
+
+
+
+    private void launchCustomerClient(String userID) {
+        CustomerClient.launchWithUser(userID); // Ensures only one instance is launched
+    }
+
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -89,11 +98,6 @@ public class CustomerLogin extends Application {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    private void launchCustomerClient(String userID) {
-        // Launch CustomerClient with the authenticated userID
-        CustomerClient.launchWithUser(userID);
     }
 
     public static void main(String[] args) {

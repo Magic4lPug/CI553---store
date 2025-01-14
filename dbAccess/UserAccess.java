@@ -104,6 +104,58 @@ public class UserAccess {
         }
     }
 
+    public String getUserID(String login) throws StockException {
+        String query = login.contains("@")
+                ? "SELECT userID FROM UserTable WHERE email = ?"
+                : "SELECT userID FROM UserTable WHERE username = ?";
+        try (PreparedStatement stmt = theCon.prepareStatement(query)) {
+            stmt.setString(1, login);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("userID");
+                }
+            }
+        } catch (SQLException e) {
+            throw new StockException("SQL getUserID: " + e.getMessage());
+        }
+        return null; // Return null if no user found
+    }
+
+    public String getUserIDByLogin(String login, String password) throws StockException {
+        String query = login.contains("@")
+                ? "SELECT userID FROM UserTable WHERE email = ? AND password = ?"
+                : "SELECT userID FROM UserTable WHERE username = ? AND password = ?";
+
+        try (PreparedStatement stmt = theCon.prepareStatement(query)) {
+            stmt.setString(1, login);
+            stmt.setString(2, password);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("userID"); // Return the userID
+                }
+            }
+        } catch (SQLException e) {
+            throw new StockException("SQL getUserIDByLogin: " + e.getMessage());
+        }
+        return null; // Return null if no user matches
+    }
+
+
+    public String getUsername(String userID) throws StockException {
+        String query = "SELECT username FROM UserTable WHERE userID = ?";
+        try (PreparedStatement stmt = theCon.prepareStatement(query)) {
+            stmt.setString(1, userID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("username");
+                }
+            }
+        } catch (SQLException e) {
+            throw new StockException("SQL getUsername: " + e.getMessage());
+        }
+        return null;
+    }
+
 
 
 }

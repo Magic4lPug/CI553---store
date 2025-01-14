@@ -29,7 +29,7 @@ class Setup {
                   "userID TEXT PRIMARY KEY," +
                   "username TEXT NOT NULL," +
                   "password TEXT NOT NULL," +
-                  "email TEXT," +
+                  "email TEXT NOT NULL," +
                   "role TEXT);",
 
           "CREATE TABLE BasketTable (" +

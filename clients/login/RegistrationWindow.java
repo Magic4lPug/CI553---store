@@ -1,4 +1,4 @@
-// Updated RegistrationWindow to include email uniqueness check
+// Updated RegistrationWindow to include improved email validation and updated error message
 package clients.login;
 
 import dbAccess.DBAccessFactory;
@@ -56,7 +56,7 @@ public class RegistrationWindow extends Application {
             }
 
             if (!isValidEmail(email)) {
-                showAlert("Error", "Invalid email address. Please enter a valid email (e.g., example@domain.com).");
+                showAlert("Error", "Please include an email in the following format: example@domain.com");
                 return;
             }
 
@@ -65,15 +65,13 @@ public class RegistrationWindow extends Application {
                 Connection connection = (new DBAccessFactory()).getNewDBAccess().getConnection();
                 UserAccess userAccess = new UserAccess(connection);
 
-                // Check if username exists
                 if (userAccess.doesUsernameExist(username)) {
-                    showAlert("Error", "Username already exists. Please choose a different username.");
+                    showAlert("Error", "Username already exists.");
                     return;
                 }
 
-                // Check if email exists
                 if (userAccess.doesEmailExist(email)) {
-                    showAlert("Error", "Email already exists. Please use a different email.");
+                    showAlert("Error", "Email already exists.");
                     return;
                 }
 
@@ -112,7 +110,8 @@ public class RegistrationWindow extends Application {
     }
 
     private boolean isValidEmail(String email) {
-        return email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+        // Improved regex for email validation
+        return email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
     }
 
     private void showAlert(String title, String message) {
