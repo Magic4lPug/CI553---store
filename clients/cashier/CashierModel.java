@@ -13,12 +13,8 @@ import java.util.List;
 import java.util.Observable;
 
 public class CashierModel extends Observable {
-  private enum State {PROCESS, CHECKED}
-
-  private State theState = State.PROCESS; // Current state
-  private Basket theBasket = null;        // Current customer order
+  private Basket theBasket = null; // Current customer order
   private final List<Basket> taskList = new ArrayList<>(); // Unclaimed tasks
-  private final List<Basket> claimedTasks = new ArrayList<>(); // Claimed tasks
   private final List<Basket> processingTasks = new ArrayList<>(); // Processing tasks
   private final List<Basket> packedTasks = new ArrayList<>(); // Packed tasks
 
@@ -29,7 +25,7 @@ public class CashierModel extends Observable {
     try {
       theStock = mf.makeStockReadWriter(); // Fetch stock details
       theOrder = mf.makeOrderProcessing(); // Fetch order processing
-      startOrderListening();              // Start listening for orders
+      startOrderListening(); // Start listening for orders
     } catch (Exception e) {
       System.err.println("Error initializing CashierModel: " + e.getMessage());
     }
@@ -66,19 +62,15 @@ public class CashierModel extends Observable {
     return createTableModel(taskList, "Unclaimed");
   }
 
-  public DefaultTableModel getClaimedTaskData() {
-    return createTableModel(claimedTasks, "Claimed");
-  }
-
   public DefaultTableModel getProcessingTaskData() {
     return createTableModel(processingTasks, "Processing");
   }
 
   public DefaultTableModel getPackedTaskData() {
-    return createTableModel(packedTasks, "Packed");
+    return createTableModel(packedTasks, "Packing"); // Default to "Packing" until packed
   }
 
-  private DefaultTableModel createTableModel(List<Basket> list, String status) {
+  private DefaultTableModel createTableModel(List<Basket> list, String defaultStatus) {
     String[] columns = {"Order ID", "Items", "Total Price", "Status"};
     Object[][] data = new Object[list.size()][columns.length];
 
@@ -86,32 +78,25 @@ public class CashierModel extends Observable {
       Basket basket = list.get(i);
       double total = basket.stream().mapToDouble(p -> p.getPrice() * p.getQuantity()).sum();
       data[i][0] = basket.getOrderNum();
-      data[i][1] = basket.size(); // Number of items
-      data[i][2] = total;         // Total price
-      data[i][3] = status;        // Status
+      data[i][1] = basket.size();
+      data[i][2] = total;
+      data[i][3] = basket.isPacked() ? "Packed" : defaultStatus;
     }
 
-    return new DefaultTableModel(data, columns);
+    return new DefaultTableModel(data, columns) {
+      @Override
+      public boolean isCellEditable(int row, int column) {
+        return false; // Make all cells non-editable
+      }
+    };
   }
 
   public void claimTask(int taskIndex) {
     if (taskIndex >= 0 && taskIndex < taskList.size()) {
       Basket claimedTask = taskList.remove(taskIndex); // Remove from unclaimed tasks
-      claimedTasks.add(claimedTask);                  // Add to claimed tasks
+      processingTasks.add(claimedTask); // Add to processing tasks
       setChanged();
       notifyObservers("Task claimed successfully!");
-    } else {
-      setChanged();
-      notifyObservers("Invalid task selection.");
-    }
-  }
-
-  public void processClaimedTask(int taskIndex) {
-    if (taskIndex >= 0 && taskIndex < claimedTasks.size()) {
-      Basket processingTask = claimedTasks.remove(taskIndex); // Remove from claimed tasks
-      processingTasks.add(processingTask);                   // Add to processing tasks
-      setChanged();
-      notifyObservers("Task moved to processing!");
     } else {
       setChanged();
       notifyObservers("Invalid task selection.");
@@ -121,9 +106,9 @@ public class CashierModel extends Observable {
   public void completeProcessingTask(int taskIndex) {
     if (taskIndex >= 0 && taskIndex < processingTasks.size()) {
       Basket packedTask = processingTasks.remove(taskIndex); // Remove from processing tasks
-      packedTasks.add(packedTask);                          // Add to packed tasks
+      packedTasks.add(packedTask); // Add to packed tasks
       setChanged();
-      notifyObservers("Task packed and ready for shipping!");
+      notifyObservers("Task moved to packing!");
     } else {
       setChanged();
       notifyObservers("Invalid task selection.");
@@ -133,6 +118,10 @@ public class CashierModel extends Observable {
   public void refreshTasks() {
     setChanged();
     notifyObservers("Tasks refreshed.");
+  }
+
+  public List<Basket> getPackedTasks() {
+    return packedTasks;
   }
 
   public void askForUpdate() {

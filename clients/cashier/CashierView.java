@@ -1,7 +1,6 @@
 package clients.cashier;
 
 import clients.backDoor.BackDoorView;
-import clients.packing.PackingView;
 import middle.MiddleFactory;
 
 import javax.swing.*;
@@ -17,11 +16,6 @@ public class CashierView implements Observer {
   private final JTabbedPane tabbedPane = new JTabbedPane();
   private final JTable taskTable = new JTable(); // Task table
   private final JScrollPane taskScrollPane = new JScrollPane(taskTable);
-  private final JButton refreshTasksButton = new JButton("Refresh Tasks");
-
-  private final JTable claimedTaskTable = new JTable(); // Table for claimed tasks
-  private final JScrollPane claimedTaskScrollPane = new JScrollPane(claimedTaskTable);
-  private final JButton claimTaskButton = new JButton("Claim Task");
 
   private final JTable processingTaskTable = new JTable(); // Table for processing tasks
   private final JScrollPane processingTaskScrollPane = new JScrollPane(processingTaskTable);
@@ -29,6 +23,7 @@ public class CashierView implements Observer {
 
   private final JTable packedTaskTable = new JTable(); // Table for packed tasks
   private final JScrollPane packedTaskScrollPane = new JScrollPane(packedTaskTable);
+  private final JButton packTaskButton = new JButton("Pack Task"); // New "Pack Task" button
 
   private final JLabel theOutput = new JLabel("Status: Ready"); // Added status output
   private CashierController cont;
@@ -45,38 +40,28 @@ public class CashierView implements Observer {
     taskScrollPane.setBounds(10, 10, 560, 300);
     taskPanel.add(taskScrollPane);
 
-    refreshTasksButton.setBounds(10, 320, 150, 30);
-    refreshTasksButton.addActionListener(e -> cont.refreshTasks());
-    taskPanel.add(refreshTasksButton);
-
-    tabbedPane.addTab("Tasks", taskPanel);
-
-    // Tab 2: Claimed Tasks
-    JPanel claimedTaskPanel = new JPanel(null);
-    claimedTaskScrollPane.setBounds(10, 10, 560, 300);
-    claimedTaskPanel.add(claimedTaskScrollPane);
-
+    JButton claimTaskButton = new JButton("Claim Task");
     claimTaskButton.setBounds(10, 320, 150, 30);
     claimTaskButton.addActionListener(e -> {
       int selectedRow = taskTable.getSelectedRow();
       if (selectedRow != -1) {
-        cont.claimTask(selectedRow); // Claim selected task
+        cont.claimTask(selectedRow); // Claim the selected task
       } else {
         JOptionPane.showMessageDialog(null, "No task selected!");
       }
     });
-    claimedTaskPanel.add(claimTaskButton);
+    taskPanel.add(claimTaskButton);
 
-    tabbedPane.addTab("Claimed Tasks", claimedTaskPanel);
+    tabbedPane.addTab("Tasks", taskPanel);
 
-    // Tab 3: Processing Tasks
+    // Tab 2: Processing Tasks
     JPanel processingTaskPanel = new JPanel(null);
     processingTaskScrollPane.setBounds(10, 10, 560, 300);
     processingTaskPanel.add(processingTaskScrollPane);
 
     completeTaskButton.setBounds(10, 320, 150, 30);
     completeTaskButton.addActionListener(e -> {
-      int selectedRow = claimedTaskTable.getSelectedRow();
+      int selectedRow = processingTaskTable.getSelectedRow();
       if (selectedRow != -1) {
         cont.completeProcessingTask(selectedRow); // Complete processing task
       } else {
@@ -87,12 +72,29 @@ public class CashierView implements Observer {
 
     tabbedPane.addTab("Processing Tasks", processingTaskPanel);
 
-    // Tab 4: Packed Tasks
+    // Tab 3: Packed Tasks
     JPanel packedTaskPanel = new JPanel(null);
     packedTaskScrollPane.setBounds(10, 10, 560, 300);
     packedTaskPanel.add(packedTaskScrollPane);
 
+    packTaskButton.setBounds(10, 320, 150, 30);
+    packTaskButton.addActionListener(e -> {
+      int selectedRow = packedTaskTable.getSelectedRow();
+      if (selectedRow != -1) {
+        cont.packTask(selectedRow); // Mark task as packed
+        JOptionPane.showMessageDialog(null, "Task successfully packed!");
+      } else {
+        JOptionPane.showMessageDialog(null, "No task selected for packing!");
+      }
+    });
+    packedTaskPanel.add(packTaskButton);
+
     tabbedPane.addTab("Packed Tasks", packedTaskPanel);
+
+
+    // Tab 4: Backdoor
+    BackDoorView backDoorView = new BackDoorView(mf);
+    tabbedPane.addTab("Backdoor", backDoorView.getPanel());
 
     tabbedPane.setBounds(0, 0, W, H);
     cp.add(tabbedPane);
@@ -114,12 +116,6 @@ public class CashierView implements Observer {
     DefaultTableModel taskTableModel = model.getTaskData();
     if (taskTableModel != null) {
       taskTable.setModel(taskTableModel);
-    }
-
-    // Update claimed task table
-    DefaultTableModel claimedTableModel = model.getClaimedTaskData();
-    if (claimedTableModel != null) {
-      claimedTaskTable.setModel(claimedTableModel);
     }
 
     // Update processing task table

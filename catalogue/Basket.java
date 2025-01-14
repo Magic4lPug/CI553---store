@@ -68,4 +68,15 @@ public class Basket extends ArrayList<Product> implements Serializable {
   public ArrayList<Product> getItems() {
     return new ArrayList<>(this);
   }
+
+  private boolean packed = false;
+
+  public boolean isPacked() {
+    return packed;
+  }
+
+  public void setPacked(boolean packed) {
+    this.packed = packed;
+  }
+
 }

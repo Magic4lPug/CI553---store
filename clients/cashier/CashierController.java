@@ -1,5 +1,6 @@
-
 package clients.cashier;
+
+import catalogue.Basket;
 
 import javax.swing.*;
 
@@ -12,33 +13,27 @@ public class CashierController {
     this.view = view;
   }
 
-  public void processOrder() {
-    if (model.getBasket() != null) {
-      model.clearBasket();
-      JOptionPane.showMessageDialog(null, "Order processed successfully!");
-    } else {
-      JOptionPane.showMessageDialog(null, "No orders to process.");
-    }
-  }
-
-  // Add the refreshTasks method
   public void refreshTasks() {
     model.refreshTasks(); // Notify the model to refresh tasks
     JOptionPane.showMessageDialog(null, "Tasks refreshed successfully!");
   }
 
   public void claimTask(int taskIndex) {
-    model.claimTask(taskIndex);
-  }
-
-  public void processClaimedTask(int taskIndex) {
-    model.processClaimedTask(taskIndex);
+    model.claimTask(taskIndex); // Move task from "Tasks" to "Processing"
   }
 
   public void completeProcessingTask(int taskIndex) {
-    model.completeProcessingTask(taskIndex);
+    model.completeProcessingTask(taskIndex); // Move task from "Processing" to "Packed"
   }
 
-
-
+  public void packTask(int taskIndex) {
+    java.util.List<Basket> packedTasks = model.getPackedTasks(); // Access packed tasks via getter
+    if (taskIndex >= 0 && taskIndex < packedTasks.size()) {
+      Basket packedTask = packedTasks.get(taskIndex);
+      packedTask.setPacked(true); // Mark task as packed
+      model.refreshTasks(); // Notify observers to refresh UI
+    } else {
+      JOptionPane.showMessageDialog(null, "Invalid task selection.");
+    }
+  }
 }
