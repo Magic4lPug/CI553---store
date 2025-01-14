@@ -63,7 +63,7 @@ public class CustomerView implements Observer {
     checkoutButton.addActionListener(e -> cont.checkoutBasket());
     cp.add(checkoutButton);
 
-    rootWindow.setVisible(true);;
+    rootWindow.setVisible(true);
   }
 
   public void setController(CustomerController c) {
@@ -78,10 +78,12 @@ public class CustomerView implements Observer {
       if (model.hasError()) {
         showError(model.getErrorMessage());
       } else {
+        System.out.println("Updating product table..."); // Debug: Log updates
         populateProductTable(model.getProducts());
       }
     }
   }
+
 
   private void showError(String errorMessage) {
     JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
@@ -126,5 +128,4 @@ public class CustomerView implements Observer {
 
     return new Product(productNum, description, price, quantity);
   }
-
 }

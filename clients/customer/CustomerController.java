@@ -4,7 +4,6 @@ import catalogue.Basket;
 import catalogue.Product;
 
 import javax.swing.*;
-import java.util.List;
 
 public class CustomerController {
   private final CustomerModel model;
@@ -14,21 +13,15 @@ public class CustomerController {
     this.model = model;
     this.view = view;
 
-    model.fetchAllProducts();
+    model.addObserver(view); // Add the view as an observer
+    model.fetchAllProducts(); // Fetch all products on initialization
   }
 
-  /**
-   * Perform a search based on user input.
-   * @param query Search query.
-   */
+
   public void doSearch(String query) {
     model.searchProducts(query);
   }
 
-
-  /**
-   * View the customer's basket.
-   */
   public void viewBasket() {
     Basket basket = model.getBasket();
     if (basket.isEmpty()) {
@@ -46,7 +39,6 @@ public class CustomerController {
 
     JOptionPane.showMessageDialog(null, basketDetails.toString(), "Basket", JOptionPane.INFORMATION_MESSAGE);
   }
-
 
   public void addToBasket(Product product) {
     if (product != null) {
@@ -68,5 +60,4 @@ public class CustomerController {
       JOptionPane.showMessageDialog(null, "Checkout failed. Please try again later.");
     }
   }
-
 }

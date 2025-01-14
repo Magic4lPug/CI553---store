@@ -25,34 +25,21 @@ public class CustomerModel extends Observable {
   public CustomerModel(MiddleFactory mf) {
     try {
       theStock = mf.makeStockReader(); // Connect to the stock database
-      fetchAllProducts();             // Fetch all products at startup
+      fetchAllProducts(); // Fetch all products at startup
     } catch (Exception e) {
       throw new RuntimeException("Failed to initialize CustomerModel: " + e.getMessage());
-    }
-  }
-
-
-  private void loadProducts() {
-    try {
-      products = theStock.getAllProducts(); // Fetch all products
-      setChanged();
-      notifyObservers();
-    } catch (StockException e) {
-      notifyObserversWithError("Failed to load products: " + e.getMessage());
     }
   }
 
   public void fetchAllProducts() {
     try {
       products = theStock.getAllProducts(); // Fetch products from the stock
-      setChanged();
+      setChanged(); // Mark the observable as changed
       notifyObservers(); // Notify observers to refresh the view
     } catch (StockException e) {
       notifyObserversWithError("Failed to fetch products: " + e.getMessage());
     }
   }
-
-
 
   public void searchProducts(String query) {
     try {
@@ -63,7 +50,6 @@ public class CustomerModel extends Observable {
       notifyObserversWithError("Search failed: " + e.getMessage());
     }
   }
-
 
   public void addToBasket(Product product) {
     theBasket.add(product);
@@ -105,5 +91,4 @@ public class CustomerModel extends Observable {
       return false;
     }
   }
-
 }
