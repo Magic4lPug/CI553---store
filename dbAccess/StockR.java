@@ -14,28 +14,22 @@ import java.util.List;
  * Implements read-only access to the stock database.
  */
 public class StockR implements StockReader {
-  private Connection theCon = null; // Connection to database
-  private Statement theStmt = null; // Statement object
+  protected Connection theCon = null; // Connection to database
 
   /**
-   * Connects to database
-   * Uses a factory method to help setup the connection
+   * Connects to the database using a factory method.
    *
-   * @throws StockException if problem
+   * @throws StockException if a problem occurs
    */
   public StockR() throws StockException {
     try {
       DBAccess dbDriver = (new DBAccessFactory()).getNewDBAccess();
       dbDriver.loadDriver();
-
       theCon = DriverManager.getConnection(
               dbDriver.urlOfDatabase(),
               dbDriver.username(),
               dbDriver.password()
       );
-
-      theStmt = theCon.createStatement();
-      theCon.setAutoCommit(true);
     } catch (SQLException e) {
       throw new StockException("SQL problem: " + e.getMessage());
     } catch (Exception e) {
@@ -43,92 +37,55 @@ public class StockR implements StockReader {
     }
   }
 
-  /**
-   * Returns a statement object that is used to process SQL statements
-   *
-   * @return A statement object used to access the database
-   */
-  protected Statement getStatementObject() {
-    return theStmt;
-  }
-
-  /**
-   * Returns a connection object that is used to process
-   * requests to the DataBase
-   *
-   * @return a connection object
-   */
-  protected Connection getConnectionObject() {
-    return theCon;
-  }
-
-  /**
-   * Checks if the product exists in the stock list
-   *
-   * @param pNum The product number
-   * @return true if exists otherwise false
-   */
+  @Override
   public synchronized boolean exists(String pNum) throws StockException {
-    try {
-      ResultSet rs = getStatementObject().executeQuery(
-              "SELECT price FROM ProductTable " +
-                      "WHERE ProductTable.productNo = '" + pNum + "'"
-      );
-      boolean res = rs.next();
-      DEBUG.trace("DB StockR: exists(%s) -> %s", pNum, (res ? "T" : "F"));
-      return res;
+    String query = "SELECT 1 FROM ProductTable WHERE productNo = ?";
+    try (PreparedStatement stmt = theCon.prepareStatement(query)) {
+      stmt.setString(1, pNum);
+      try (ResultSet rs = stmt.executeQuery()) {
+        return rs.next();
+      }
     } catch (SQLException e) {
       throw new StockException("SQL exists: " + e.getMessage());
     }
   }
 
-  /**
-   * Returns details about the product in the stock list.
-   * Assumed to exist in database.
-   *
-   * @param pNum The product number
-   * @return Details in an instance of a Product
-   */
+  @Override
   public synchronized Product getDetails(String pNum) throws StockException {
-    try {
-      Product dt = new Product("0", "", 0.00, 0);
-      ResultSet rs = getStatementObject().executeQuery(
-              "SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, StockTable.stockLevel " +
-                      "FROM ProductTable " +
-                      "JOIN StockTable ON ProductTable.productNo = StockTable.productNo " +
-                      "WHERE ProductTable.productNo = '" + pNum + "'"
-      );
-      if (rs.next()) {
-        dt.setProductNum(pNum);
-        dt.setDescription(rs.getString("description"));
-        dt.setPrice(rs.getDouble("price"));
-        dt.setQuantity(rs.getInt("stockLevel"));
+    String query = """
+            SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, StockTable.stockLevel 
+            FROM ProductTable
+            JOIN StockTable ON ProductTable.productNo = StockTable.productNo
+            WHERE ProductTable.productNo = ?
+        """;
+    try (PreparedStatement stmt = theCon.prepareStatement(query)) {
+      stmt.setString(1, pNum);
+      try (ResultSet rs = stmt.executeQuery()) {
+        if (rs.next()) {
+          return new Product(
+                  rs.getString("productNo"),
+                  rs.getString("description"),
+                  rs.getDouble("price"),
+                  rs.getInt("stockLevel")
+          );
+        }
+        throw new StockException("Product not found: " + pNum);
       }
-      rs.close();
-      return dt;
     } catch (SQLException e) {
       throw new StockException("SQL getDetails: " + e.getMessage());
     }
   }
 
-
-  /**
-   * Returns all products in the stock list.
-   *
-   * @return A list of all available products.
-   * @throws StockException if there is an SQL issue.
-   */
   @Override
   public synchronized List<Product> getAllProducts() throws StockException {
     List<Product> products = new ArrayList<>();
-    try {
-      System.out.println("Executing query to fetch all products...");
-      ResultSet rs = getStatementObject().executeQuery(
-              "SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, StockTable.stockLevel " +
-                      "FROM ProductTable " +
-                      "JOIN StockTable ON ProductTable.productNo = StockTable.productNo"
-      );
-
+    String query = """
+            SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, StockTable.stockLevel
+            FROM ProductTable
+            JOIN StockTable ON ProductTable.productNo = StockTable.productNo
+        """;
+    try (PreparedStatement stmt = theCon.prepareStatement(query);
+         ResultSet rs = stmt.executeQuery()) {
       while (rs.next()) {
         products.add(new Product(
                 rs.getString("productNo"),
@@ -137,75 +94,53 @@ public class StockR implements StockReader {
                 rs.getInt("stockLevel")
         ));
       }
-      rs.close();
     } catch (SQLException e) {
       throw new StockException("SQL getAllProducts: " + e.getMessage());
     }
     return products;
   }
 
-
-
-
-  /**
-   * Searches for products in the stock list based on a query.
-   *
-   * @param query The search query.
-   * @return A list of products that match the query.
-   * @throws StockException if there is an SQL issue.
-   */
   @Override
   public synchronized List<Product> searchProducts(String query) throws StockException {
     List<Product> products = new ArrayList<>();
-    try {
-      String sqlQuery = "SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, StockTable.stockLevel " +
-              "FROM ProductTable " +
-              "JOIN StockTable ON ProductTable.productNo = StockTable.productNo " +
-              "WHERE ProductTable.description LIKE ?";
-      PreparedStatement stmt = theCon.prepareStatement(sqlQuery);
+    String sqlQuery = """
+            SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, StockTable.stockLevel
+            FROM ProductTable
+            JOIN StockTable ON ProductTable.productNo = StockTable.productNo
+            WHERE ProductTable.description LIKE ?
+        """;
+    try (PreparedStatement stmt = theCon.prepareStatement(sqlQuery)) {
       stmt.setString(1, "%" + query + "%");
-      ResultSet rs = stmt.executeQuery();
-      while (rs.next()) {
-        products.add(new Product(
-                rs.getString("productNo"),
-                rs.getString("description"),
-                rs.getDouble("price"),
-                rs.getInt("stockLevel")
-        ));
+      try (ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          products.add(new Product(
+                  rs.getString("productNo"),
+                  rs.getString("description"),
+                  rs.getDouble("price"),
+                  rs.getInt("stockLevel")
+          ));
+        }
       }
-      rs.close();
     } catch (SQLException e) {
       throw new StockException("SQL searchProducts: " + e.getMessage());
     }
     return products;
   }
 
-
-  /**
-   * Returns 'image' of the product
-   *
-   * @param pNum The product number
-   * Assumed to exist in database.
-   * @return ImageIcon representing the image
-   */
+  @Override
   public synchronized ImageIcon getImage(String pNum) throws StockException {
+    String query = "SELECT picture FROM ProductTable WHERE productNo = ?";
     String filename = "default.jpg";
-    try {
-      ResultSet rs = getStatementObject().executeQuery(
-              "SELECT picture FROM ProductTable " +
-                      "WHERE ProductTable.productNo = '" + pNum + "'"
-      );
-
-      boolean res = rs.next();
-      if (res)
-        filename = rs.getString("picture");
-      rs.close();
+    try (PreparedStatement stmt = theCon.prepareStatement(query)) {
+      stmt.setString(1, pNum);
+      try (ResultSet rs = stmt.executeQuery()) {
+        if (rs.next()) {
+          filename = rs.getString("picture");
+        }
+      }
     } catch (SQLException e) {
-      DEBUG.error("getImage()\n%s\n", e.getMessage());
       throw new StockException("SQL getImage: " + e.getMessage());
     }
-
-    // DEBUG.trace("DB StockR: getImage -> %s", filename);
     return new ImageIcon(filename);
   }
 }

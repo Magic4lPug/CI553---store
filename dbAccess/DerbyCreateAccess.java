@@ -9,10 +9,9 @@ package dbAccess;
  
 class DerbyCreateAccess extends DBAccess
 {
-  private static final String URLdb =
-                 "jdbc:derby:catshop.db;create=true";
-  private static final String DRIVER =
-                 "org.apache.derby.jdbc.EmbeddedDriver";
+  private static final String URLdb = "jdbc:sqlite:catshop.db";
+  private static final String DRIVER = "org.sqlite.JDBC";
+
 
   public void loadDriver() throws Exception
   {

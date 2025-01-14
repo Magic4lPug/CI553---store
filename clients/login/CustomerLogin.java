@@ -1,11 +1,16 @@
 package clients.login;
 
 import clients.customer.CustomerClient;
+import dbAccess.DBAccessFactory;
+import dbAccess.UserAccess;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
 
 public class CustomerLogin extends Application {
 
@@ -21,6 +26,7 @@ public class CustomerLogin extends Application {
         PasswordField passwordField = new PasswordField();
 
         Button loginButton = new Button("Login");
+        Button registerButton = new Button("Register");
 
         // Add Action for Login Button
         loginButton.setOnAction(e -> {
@@ -35,6 +41,12 @@ public class CustomerLogin extends Application {
             }
         });
 
+        // Add Action for Register Button
+        registerButton.setOnAction(e -> {
+            RegistrationWindow registrationWindow = new RegistrationWindow();
+            registrationWindow.start(new Stage()); // Open Registration Window
+        });
+
         // Create Layout
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -43,7 +55,8 @@ public class CustomerLogin extends Application {
         grid.add(usernameField, 1, 0);
         grid.add(passwordLabel, 0, 1);
         grid.add(passwordField, 1, 1);
-        grid.add(loginButton, 0, 2, 2, 1);
+        grid.add(loginButton, 0, 2);
+        grid.add(registerButton, 1, 2);
 
         // Set Scene
         Scene scene = new Scene(grid, 300, 200);
@@ -52,8 +65,15 @@ public class CustomerLogin extends Application {
     }
 
     private boolean authenticateCustomer(String username, String password) {
-        // Replace with your customer authentication logic
-        return "customer1".equals(username) && "password1".equals(password);
+        try {
+            DBAccessFactory.setAction("");
+            Connection connection = (new DBAccessFactory()).getNewDBAccess().getConnection();
+            UserAccess userAccess = new UserAccess(connection);
+            return userAccess.authenticate(username, password);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private void showAlert(String title, String message) {

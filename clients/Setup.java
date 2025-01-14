@@ -4,40 +4,57 @@ import dbAccess.DBAccess;
 import dbAccess.DBAccessFactory;
 
 import java.sql.*;
-import java.util.ArrayList;
 
 class Setup {
+
   private static final String[] sqlStatements = {
-          // Drop tables if they exist
-          "DROP TABLE StockTable",
-          "DROP TABLE ProductTable",
+          "DROP TABLE IF EXISTS StockTable;",
+          "DROP TABLE IF EXISTS ProductTable;",
+          "DROP TABLE IF EXISTS UserTable;",
 
-          // Create ProductTable
           "CREATE TABLE ProductTable (" +
-                  "productNo CHAR(4) PRIMARY KEY," +
-                  "description VARCHAR(40)," +
-                  "picture VARCHAR(80)," +
-                  "price FLOAT)",
+                  "productNo TEXT PRIMARY KEY," +
+                  "description TEXT," +
+                  "picture TEXT," +
+                  "price REAL);",
 
-          // Create StockTable with a foreign key to ProductTable
           "CREATE TABLE StockTable (" +
-                  "productNo CHAR(4) PRIMARY KEY," +
+                  "productNo TEXT PRIMARY KEY," +
                   "stockLevel INTEGER," +
-                  "FOREIGN KEY (productNo) REFERENCES ProductTable(productNo))",
+                  "FOREIGN KEY (productNo) REFERENCES ProductTable(productNo));",
 
-          // Insert sample products into ProductTable
-          "INSERT INTO ProductTable VALUES ('0001', '40 inch LED HD TV', 'images/pic0001.jpg', 269.00)",
-          "INSERT INTO ProductTable VALUES ('0002', 'DAB Radio', 'images/pic0002.jpg', 29.99)",
-          "INSERT INTO ProductTable VALUES ('0003', 'Toaster', 'images/pic0003.jpg', 19.99)",
-          "INSERT INTO ProductTable VALUES ('0004', 'Watch', 'images/pic0004.jpg', 29.99)",
+          "CREATE TABLE UserTable (" +
+                  "userID TEXT PRIMARY KEY," +
+                  "username TEXT NOT NULL," +
+                  "password TEXT NOT NULL," +
+                  "email TEXT," +
+                  "role TEXT);",
 
-          // Insert stock levels for products into StockTable
-          "INSERT INTO StockTable VALUES ('0001', 90)",
-          "INSERT INTO StockTable VALUES ('0002', 20)",
-          "INSERT INTO StockTable VALUES ('0003', 33)",
-          "INSERT INTO StockTable VALUES ('0004', 15)" // Added stock for the watch
+          // Insert products
+          "INSERT INTO ProductTable VALUES ('0001', '40 inch LED HD TV', 'images/pic0001.jpg', 269.00);",
+          "INSERT INTO ProductTable VALUES ('0002', 'DAB Radio', 'images/pic0002.jpg', 29.99);",
+          "INSERT INTO ProductTable VALUES ('0003', 'Toaster', 'images/pic0003.jpg', 19.99);",
+          "INSERT INTO ProductTable VALUES ('0004', 'Watch', 'images/pic0004.jpg', 49.99);",
+          "INSERT INTO ProductTable VALUES ('0005', 'Wireless Headphones', 'images/pic0005.jpg', 89.99);",
+          "INSERT INTO ProductTable VALUES ('0006', 'Smartphone', 'images/pic0006.jpg', 499.00);",
+          "INSERT INTO ProductTable VALUES ('0007', 'Gaming Console', 'images/pic0007.jpg', 399.00);",
+          "INSERT INTO ProductTable VALUES ('0008', 'Laptop', 'images/pic0008.jpg', 899.00);",
+
+          // Insert stock
+          "INSERT INTO StockTable VALUES ('0001', 90);",
+          "INSERT INTO StockTable VALUES ('0002', 50);",
+          "INSERT INTO StockTable VALUES ('0003', 40);",
+          "INSERT INTO StockTable VALUES ('0004', 30);",
+          "INSERT INTO StockTable VALUES ('0005', 20);",
+          "INSERT INTO StockTable VALUES ('0006', 15);",
+          "INSERT INTO StockTable VALUES ('0007', 10);",
+          "INSERT INTO StockTable VALUES ('0008', 5);",
+
+          // Insert users
+          "INSERT INTO UserTable VALUES ('U001', 'admin', 'admin123', 'admin@example.com', 'admin');",
+          "INSERT INTO UserTable VALUES ('U002', 'john_doe', 'password123', 'john.doe@example.com', 'customer');",
+          "INSERT INTO UserTable VALUES ('U003', 'jane_doe', 'pass456', 'jane.doe@example.com', 'customer');"
   };
-
 
   public static void main(String[] args) {
     Connection theCon = null;
