@@ -93,10 +93,12 @@ public class CustomerClient {
 
     CustomerModel model = new CustomerModel(mf);
     CustomerView view = new CustomerView(window, 0, 0);
-    CustomerController cont = new CustomerController(model, view, databaseConnection, userID);
+    CustomerController cont = new CustomerController(model, view, databaseConnection, userID, window);
     view.setController(cont);
 
     model.addObserver(view);
     window.setVisible(true);
   }
+
+
 }

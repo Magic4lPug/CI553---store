@@ -1,3 +1,4 @@
+// Updated RegistrationWindow to include email uniqueness check
 package clients.login;
 
 import dbAccess.DBAccessFactory;
@@ -7,8 +8,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import middle.StockException;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.UUID;
 
 public class RegistrationWindow extends Application {
@@ -63,6 +68,12 @@ public class RegistrationWindow extends Application {
                 // Check if username exists
                 if (userAccess.doesUsernameExist(username)) {
                     showAlert("Error", "Username already exists. Please choose a different username.");
+                    return;
+                }
+
+                // Check if email exists
+                if (userAccess.doesEmailExist(email)) {
+                    showAlert("Error", "Email already exists. Please use a different email.");
                     return;
                 }
 

@@ -6,6 +6,8 @@ import catalogue.Product;
 
 import javax.swing.*;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class CustomerController {
   private final CustomerModel model;
@@ -14,13 +16,13 @@ public class CustomerController {
   private final BasketController basketController;
   private final String userID; // Unique user identifier
 
-  public CustomerController(CustomerModel model, CustomerView view, Connection databaseConnection, String userID) {
+  public CustomerController(CustomerModel model, CustomerView view, Connection databaseConnection, String userID, JFrame mainWindow) {
     this.model = model;
     this.view = view;
     this.userID = userID;
 
-    // Initialize the profile handler with user details
-    this.profileHandler = new CustomerProfileHandler(userID, "john.doe@example.com");
+    // Initialize the profile handler dynamically with the userID and the main window reference
+    this.profileHandler = new CustomerProfileHandler(userID, mainWindow);
 
     // Initialize the basket controller with the model's basket, database connection, and userID
     this.basketController = new BasketController(model.getBasket(), databaseConnection, userID);
@@ -38,7 +40,6 @@ public class CustomerController {
   }
 
   public void viewBasket() {
-    // Ensure the basket controller and view are initialized correctly
     if (basketController != null) {
       basketController.viewBasket();
     } else {
@@ -52,11 +53,11 @@ public class CustomerController {
               product.getProductNum(),
               product.getDescription(),
               product.getPrice(),
-              quantity // Add the specified quantity
+              quantity
       );
       model.addToBasket(productToAdd);
       JOptionPane.showMessageDialog(null, "Added " + quantity + " item(s) to basket!");
-      saveBasket(); // Save the updated basket
+      saveBasket();
     } else {
       JOptionPane.showMessageDialog(null,
               "Invalid quantity. Please ensure it's greater than 0.",
@@ -64,8 +65,6 @@ public class CustomerController {
               JOptionPane.ERROR_MESSAGE);
     }
   }
-
-
 
   public void checkoutBasket() {
     if (basketController != null) {

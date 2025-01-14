@@ -39,6 +39,18 @@ public class UserAccess {
         }
     }
 
+    public boolean doesEmailExist(String email) throws StockException {
+        String query = "SELECT 1 FROM UserTable WHERE email = ?";
+        try (PreparedStatement stmt = theCon.prepareStatement(query)) {
+            stmt.setString(1, email);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next(); // Returns true if an email exists
+            }
+        } catch (SQLException e) {
+            throw new StockException("SQL doesEmailExist: " + e.getMessage());
+        }
+    }
+
     public void createUser(String userID, String username, String password, String email, String role) throws StockException {
         String query = "INSERT INTO UserTable (userID, username, password, email, role) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = theCon.prepareStatement(query)) {
@@ -91,5 +103,7 @@ public class UserAccess {
             throw new StockException("SQL saveBasketData: " + e.getMessage());
         }
     }
+
+
 
 }
