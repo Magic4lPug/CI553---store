@@ -14,26 +14,25 @@ public class CashierController {
   }
 
   public void refreshTasks() {
-    model.refreshTasks(); // Notify the model to refresh tasks
+    model.refreshTasks();
     JOptionPane.showMessageDialog(null, "Tasks refreshed successfully!");
   }
 
   public void claimTask(int taskIndex) {
-    model.claimTask(taskIndex); // Move task from "Tasks" to "Processing"
+    model.claimTask(taskIndex);
   }
 
   public void completeProcessingTask(int taskIndex) {
-    model.completeProcessingTask(taskIndex); // Move task from "Processing" to "Packed"
+    model.completeProcessingTask(taskIndex);
   }
 
   public void packTask(int taskIndex) {
-    java.util.List<Basket> packedTasks = model.getPackedTasks(); // Access packed tasks via getter
-    if (taskIndex >= 0 && taskIndex < packedTasks.size()) {
-      Basket packedTask = packedTasks.get(taskIndex);
-      packedTask.setPacked(true); // Mark task as packed
-      model.refreshTasks(); // Notify observers to refresh UI
+    if (taskIndex >= 0) {
+      model.packTask(taskIndex);
+      JOptionPane.showMessageDialog(null, "Task successfully moved to completed orders!");
     } else {
-      JOptionPane.showMessageDialog(null, "Invalid task selection.");
+      JOptionPane.showMessageDialog(null, "No task selected for packing!");
     }
   }
+
 }

@@ -6,6 +6,8 @@
 
 package middle;
 
+import java.sql.Connection;
+
 /**
   * Provide access to middle tier components.
   */
@@ -37,5 +39,7 @@ public interface MiddleFactory
    */
   public OrderProcessing makeOrderProcessing() throws OrderException;
 
+
+  Connection makeDatabaseConnection() throws Exception;
 }
 

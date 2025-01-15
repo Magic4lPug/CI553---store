@@ -12,6 +12,13 @@ class Setup {
           "DROP TABLE IF EXISTS ProductTable;",
           "DROP TABLE IF EXISTS UserTable;",
           "DROP TABLE IF EXISTS BasketTable;",
+          "DROP TABLE IF EXISTS TaskTable;",
+
+          "CREATE TABLE TaskTable (" +
+                  "taskID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                  "taskData BLOB NOT NULL," +
+                  "status TEXT NOT NULL CHECK (status IN ('Unclaimed', 'Processing', 'Packed', 'Completed')));",
+
 
           "CREATE TABLE ProductTable (" +
                   "productNo TEXT PRIMARY KEY," +
@@ -23,7 +30,6 @@ class Setup {
                   "productNo TEXT PRIMARY KEY," +
                   "stockLevel INTEGER," +
                   "FOREIGN KEY (productNo) REFERENCES ProductTable(productNo));",
-
 
           "CREATE TABLE UserTable (" +
                   "userID TEXT PRIMARY KEY," +
@@ -63,6 +69,7 @@ class Setup {
           "INSERT INTO UserTable VALUES ('U002', 'john_doe', 'password123', 'john.doe@example.com', 'customer');",
           "INSERT INTO UserTable VALUES ('U003', 'jane_doe', 'pass456', 'jane.doe@example.com', 'customer');"
   };
+
 
   public static void main(String[] args) {
     Connection theCon = null;

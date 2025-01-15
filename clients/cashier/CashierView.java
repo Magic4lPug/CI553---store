@@ -14,19 +14,25 @@ public class CashierView implements Observer {
   private static final int W = 600; // Width of window pixels
 
   private final JTabbedPane tabbedPane = new JTabbedPane();
-  private final JTable taskTable = new JTable(); // Task table
+  private final JTable taskTable = new JTable();
   private final JScrollPane taskScrollPane = new JScrollPane(taskTable);
 
-  private final JTable processingTaskTable = new JTable(); // Table for processing tasks
+  private final JTable processingTaskTable = new JTable();
   private final JScrollPane processingTaskScrollPane = new JScrollPane(processingTaskTable);
   private final JButton completeTaskButton = new JButton("Complete Task");
 
-  private final JTable packedTaskTable = new JTable(); // Table for packed tasks
+  private final JTable packedTaskTable = new JTable();
   private final JScrollPane packedTaskScrollPane = new JScrollPane(packedTaskTable);
-  private final JButton packTaskButton = new JButton("Pack Task"); // New "Pack Task" button
+  private final JButton packTaskButton = new JButton("Pack Task");
 
-  private final JLabel theOutput = new JLabel("Status: Ready"); // Added status output
+  private final JTable completedOrdersTable = new JTable();
+  private final JScrollPane completedOrdersScrollPane = new JScrollPane(completedOrdersTable);
+  private final JTextField searchBox = new JTextField();
+  private final JButton searchButton = new JButton("Search");
+
+  private final JLabel theOutput = new JLabel("Status: Ready");
   private CashierController cont;
+  private final CompletedOrdersModel completedOrdersModel;
 
   public CashierView(RootPaneContainer rpc, MiddleFactory mf, int x, int y) {
     Container cp = rpc.getContentPane();
@@ -34,6 +40,8 @@ public class CashierView implements Observer {
     cp.setLayout(null);
     rootWindow.setSize(W, H);
     rootWindow.setLocation(x, y);
+
+    completedOrdersModel = new CompletedOrdersModel(mf); // Initialize CompletedOrdersModel
 
     // Tab 1: Tasks
     JPanel taskPanel = new JPanel(null);
@@ -45,7 +53,7 @@ public class CashierView implements Observer {
     claimTaskButton.addActionListener(e -> {
       int selectedRow = taskTable.getSelectedRow();
       if (selectedRow != -1) {
-        cont.claimTask(selectedRow); // Claim the selected task
+        cont.claimTask(selectedRow);
       } else {
         JOptionPane.showMessageDialog(null, "No task selected!");
       }
@@ -63,7 +71,7 @@ public class CashierView implements Observer {
     completeTaskButton.addActionListener(e -> {
       int selectedRow = processingTaskTable.getSelectedRow();
       if (selectedRow != -1) {
-        cont.completeProcessingTask(selectedRow); // Complete processing task
+        cont.completeProcessingTask(selectedRow);
       } else {
         JOptionPane.showMessageDialog(null, "No processing task selected!");
       }
@@ -81,7 +89,7 @@ public class CashierView implements Observer {
     packTaskButton.addActionListener(e -> {
       int selectedRow = packedTaskTable.getSelectedRow();
       if (selectedRow != -1) {
-        cont.packTask(selectedRow); // Mark task as packed
+        cont.packTask(selectedRow);
         JOptionPane.showMessageDialog(null, "Task successfully packed!");
       } else {
         JOptionPane.showMessageDialog(null, "No task selected for packing!");
@@ -91,15 +99,39 @@ public class CashierView implements Observer {
 
     tabbedPane.addTab("Packed Tasks", packedTaskPanel);
 
+    // Tab 4: Completed Orders
+    JPanel completedOrdersPanel = new JPanel(null);
+    completedOrdersScrollPane.setBounds(10, 50, 560, 260);
+    completedOrdersPanel.add(completedOrdersScrollPane);
 
-    // Tab 4: Backdoor
-    BackDoorView backDoorView = new BackDoorView(mf);
-    tabbedPane.addTab("Backdoor", backDoorView.getPanel());
+    searchBox.setBounds(10, 10, 200, 30);
+    completedOrdersPanel.add(searchBox);
+
+    searchButton.setBounds(220, 10, 100, 30);
+    searchButton.addActionListener(e -> {
+      String orderID = searchBox.getText().trim();
+      if (!orderID.isEmpty()) {
+        try {
+          int id = Integer.parseInt(orderID);
+          DefaultTableModel model = completedOrdersModel.searchCompletedOrder(id);
+          completedOrdersTable.setModel(model);
+        } catch (NumberFormatException ex) {
+          JOptionPane.showMessageDialog(null, "Invalid Order ID format.");
+        }
+      } else {
+        completedOrdersTable.setModel(completedOrdersModel.getCompletedOrdersData());
+      }
+    });
+    completedOrdersPanel.add(searchButton);
+
+    tabbedPane.addTab("Completed Orders", completedOrdersPanel);
 
     tabbedPane.setBounds(0, 0, W, H);
     cp.add(tabbedPane);
 
     rootWindow.setVisible(true);
+
+    completedOrdersTable.setModel(completedOrdersModel.getCompletedOrdersData());
   }
 
   public void setController(CashierController c) {
@@ -110,24 +142,15 @@ public class CashierView implements Observer {
   public void update(Observable modelC, Object arg) {
     CashierModel model = (CashierModel) modelC;
     String message = (String) arg;
-    theOutput.setText("Status: " + message); // Update status message
+    theOutput.setText("Status: " + message);
 
-    // Update task table
-    DefaultTableModel taskTableModel = model.getTaskData();
-    if (taskTableModel != null) {
-      taskTable.setModel(taskTableModel);
-    }
+    // Update task tables
+    taskTable.setModel(model.getTaskData());
+    processingTaskTable.setModel(model.getProcessingTaskData());
+    packedTaskTable.setModel(model.getPackedTaskData());
 
-    // Update processing task table
-    DefaultTableModel processingTableModel = model.getProcessingTaskData();
-    if (processingTableModel != null) {
-      processingTaskTable.setModel(processingTableModel);
-    }
-
-    // Update packed task table
-    DefaultTableModel packedTableModel = model.getPackedTaskData();
-    if (packedTableModel != null) {
-      packedTaskTable.setModel(packedTableModel);
-    }
+    // Refresh the completed orders table automatically
+    completedOrdersTable.setModel(completedOrdersModel.getCompletedOrdersData());
   }
+
 }

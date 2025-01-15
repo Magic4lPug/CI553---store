@@ -8,12 +8,8 @@ import javax.swing.*;
 
 public class CashierClient {
     public static void main(String[] args) {
-        String stockURL = args.length < 1
-                ? Names.STOCK_RW
-                : args[0];
-        String orderURL = args.length < 2
-                ? Names.ORDER
-                : args[1];
+        String stockURL = args.length < 1 ? Names.STOCK_RW : args[0];
+        String orderURL = args.length < 2 ? Names.ORDER : args[1];
 
         RemoteMiddleFactory mrf = new RemoteMiddleFactory();
         mrf.setStockRWInfo(stockURL);
@@ -27,11 +23,11 @@ public class CashierClient {
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         CashierModel model = new CashierModel(mf);
-        CashierView view = new CashierView(window, mf, 100, 100); // Pass MiddleFactory to view
+        CashierView view = new CashierView(window, mf, 100, 100);
         CashierController cont = new CashierController(model, view);
         view.setController(cont);
 
-        model.addObserver(view); // Add observer to the model
+        model.addObserver(view);
         model.askForUpdate();
         window.setVisible(true);
     }

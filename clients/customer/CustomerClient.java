@@ -32,12 +32,14 @@ public class CustomerClient {
   }
 
   public static void clearSession() {
-    currentUserID = null; // Reset the current user ID
+    currentUserID = null; // Reset user ID
     if (customerWindow != null) {
-      customerWindow.dispose(); // Ensure the window is disposed of
+      SwingUtilities.invokeLater(() -> {
+        customerWindow.dispose();
+        customerWindow = null;
+        System.out.println("Customer window disposed and session cleared.");
+      });
     }
-    customerWindow = null; // Reset the singleton instance
-    System.out.println("CustomerClient session cleared.");
   }
 
   private static Connection initializeDatabaseConnection() {

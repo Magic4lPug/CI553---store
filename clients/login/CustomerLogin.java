@@ -60,7 +60,11 @@ public class CustomerLogin extends Application {
         // Set Scene
         Scene scene = new Scene(grid, 300, 200);
         primaryStage.setScene(scene);
+
+        // Debug: Log window visibility
+        System.out.println("CustomerLogin window about to be displayed.");
         primaryStage.show();
+        System.out.println("CustomerLogin window displayed.");
     }
 
     private boolean authenticateCustomer(String login, String password) {
@@ -85,12 +89,24 @@ public class CustomerLogin extends Application {
         return false;
     }
 
-
-
     private void launchCustomerClient(String userID) {
         CustomerClient.launchWithUser(userID); // Ensures only one instance is launched
     }
 
+    public static void relaunch() {
+        javafx.application.Platform.runLater(() -> {
+            try {
+                System.out.println("Attempting to relaunch CustomerLogin...");
+                Stage loginStage = new Stage();
+                CustomerLogin loginApp = new CustomerLogin();
+                loginApp.start(loginStage);
+                System.out.println("CustomerLogin relaunched.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println("Failed to relaunch CustomerLogin.");
+            }
+        });
+    }
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
