@@ -1,153 +1,105 @@
 package clients.backDoor;
 
 import catalogue.Basket;
-import catalogue.BetterBasket;
 import catalogue.Product;
-import debug.DEBUG;
-import middle.MiddleFactory;
-import middle.StockException;
+import clients.customer.CustomerModel;
 import middle.StockReadWriter;
 
 import java.util.Observable;
 
 /**
- * Implements the Model of the back door client
+ * Implements the Model of the BackDoor client.
  */
-public class BackDoorModel extends Observable
-{
-  private Basket      theBasket  = null;            // Bought items
-  private String      pn = "";                      // Product being processed
-
-  private StockReadWriter theStock     = null;
-
-  /*
-   * Construct the model of the back door client
-   * @param mf The factory to create the connection objects
+public class BackDoorModel extends Observable {
+  private final StockReadWriter stock;
+  private final Basket basket = new Basket();
+  private CustomerModel customerModel;
+  /**
+   * Constructor for BackDoorModel.
+   * @param stock The StockReadWriter instance.
    */
+  public BackDoorModel(StockReadWriter stock) {
+    this.stock = stock;
+  }
 
-  public BackDoorModel(MiddleFactory mf)
-  {
-    try                                           // 
-    {      
-      theStock = mf.makeStockReadWriter();        // Database access
-    } catch ( Exception e )
-    {
-      DEBUG.error("CustomerModel.constructor\n%s", e.getMessage() );
+  public void setCustomerModel(CustomerModel customerModel) {
+    this.customerModel = customerModel;
+  }
+
+
+  /**
+   * Get the current basket.
+   * @return Basket instance.
+   */
+  public Basket getBasket() {
+    return basket;
+  }
+
+  /**
+   * Query the stock for a specific product.
+   * @param productNum Product number to query.
+   */
+  public void doQuery(String productNum) {
+    try {
+      Product product = stock.getDetails(productNum);
+      notifyAction(product.getDescription() + ": " + product.getQuantity() + " in stock.");
+    } catch (Exception e) {
+      notifyAction("Query failed: " + e.getMessage());
     }
-
-    theBasket = makeBasket();                     // Initial Basket
-  }
-  
-  /**
-   * Get the Basket of products
-   * @return basket
-   */
-  public Basket getBasket()
-  {
-    return theBasket;
   }
 
   /**
-   * Check The current stock level
-   * @param productNum The product number
+   * Restock a product with the given quantity.
+   * @param productNum Product number to restock.
+   * @param quantity Quantity to add.
    */
-  public void doCheck(String productNum )
-  {
-    pn  = productNum.trim();                    // Product no.
-  }
-
-  /**
-   * Query 
-   * @param productNum The product number of the item
-   */
-  public void doQuery(String productNum )
-  {
-    String theAction = "";
-    pn  = productNum.trim();                    // Product no.
-    try
-    {                 //  & quantity
-      if ( theStock.exists( pn ) )              // Stock Exists?
-      {                                         // T
-        Product pr = theStock.getDetails( pn ); //  Product
-        theAction =                             //   Display 
-          String.format( "%s : %7.2f (%2d) ",   //
-          pr.getDescription(),                  //    description
-          pr.getPrice(),                        //    price
-          pr.getQuantity() );                   //    quantity
-      } else {                                  //  F
-        theAction =                             //   Inform
-          "Unknown product number " + pn;       //  product number
-      } 
-    } catch( StockException e )
-    {
-      theAction = e.getMessage();
-    }
-    setChanged(); notifyObservers(theAction);
-  }
-
-  /**
-   * Re stock 
-   * @param productNum The product number of the item
-   * @param quantity How many to be added
-   */
-  public void doRStock(String productNum, String quantity )
-  {
-    String theAction = "";
-    theBasket = makeBasket();
-    pn  = productNum.trim();                    // Product no.
-    String pn  = productNum.trim();             // Product no.
-    int amount = 0;
-    try
-    {
-      String aQuantity = quantity.trim();
-      try
-      {
-        amount = Integer.parseInt(aQuantity);   // Convert
-        if ( amount < 0 )
-          throw new NumberFormatException("-ve");
+  public void doRestock(String productNum, String quantity) {
+    try {
+      int amount = Integer.parseInt(quantity.trim());
+      if (amount <= 0) throw new NumberFormatException("Quantity must be positive.");
+      if (stock.exists(productNum)) {
+        stock.addStock(productNum, amount);
+        notifyAction("Restocked " + amount + " items for product " + productNum);
+        if (customerModel != null) {
+          customerModel.fetchAllProducts(); // Refresh products
+        }
+      } else {
+        notifyAction("Unknown product: " + productNum);
       }
-      catch ( Exception err)
-      {
-        theAction = "Invalid quantity";
-        setChanged(); notifyObservers(theAction);
-        return;
-      }
-  
-      if ( theStock.exists( pn ) )              // Stock Exists?
-      {                                         // T
-        theStock.addStock(pn, amount);          //  Re stock
-        Product pr = theStock.getDetails(pn);   //  Get details
-        theBasket.add(pr);                      //
-        theAction = "";                         // Display 
-      } else {                                  // F
-        theAction =                             //  Inform Unknown
-          "Unknown product number " + pn;       //  product number
-      } 
-    } catch( StockException e )
-    {
-      theAction = e.getMessage();
+    } catch (Exception e) {
+      notifyAction("Restock failed: " + e.getMessage());
     }
-    setChanged(); notifyObservers(theAction);
   }
 
   /**
-   * Clear the product()
+   * Remove stock of a product with the given quantity.
+   * @param productNum Product number to remove stock from.
+   * @param quantity Quantity to remove.
    */
-  public void doClear()
-  {
-    String theAction = "";
-    theBasket.clear();                        // Clear s. list
-    theAction = "Enter Product Number";       // Set display
-    setChanged(); notifyObservers(theAction);  // inform the observer view that model changed
+  public void doRemoveStock(String productNum, String quantity) {
+    try {
+      int amount = Integer.parseInt(quantity.trim());
+      if (amount <= 0) throw new NumberFormatException("Quantity must be positive.");
+      if (stock.exists(productNum)) {
+        stock.addStock(productNum, -amount);
+        notifyAction("Removed " + amount + " items for product " + productNum);
+        if (customerModel != null) {
+          customerModel.fetchAllProducts(); // Refresh products
+        }
+      } else {
+        notifyAction("Unknown product: " + productNum);
+      }
+    } catch (Exception e) {
+      notifyAction("Remove stock failed: " + e.getMessage());
+    }
   }
-  
+
   /**
-   * return an instance of a Basket
-   * @return a new instance of a Basket
+   * Notify observers with a specific action message.
+   * @param action Action message to notify observers with.
    */
-  protected Basket makeBasket()
-  {
-    return new Basket();
+  private void notifyAction(String action) {
+    setChanged();
+    notifyObservers(action);
   }
 }
-

@@ -1,52 +1,32 @@
 package clients.backDoor;
 
+import clients.customer.CustomerModel;
 
 /**
- * The BackDoor Controller
+ * Handles user actions for the BackDoor.
  */
+public class BackDoorController {
+  private final BackDoorModel model;
+  private final BackDoorView view;
 
-public class BackDoorController
-{
-  private BackDoorModel model = null;
-  private BackDoorView  view  = null;
-  /**
-   * Constructor
-   * @param model The model 
-   * @param view  The view from which the interaction came
-   */
-  public BackDoorController( BackDoorModel model, BackDoorView view )
-  {
-    this.view  = view;
+  public BackDoorController(BackDoorModel model, BackDoorView view) {
     this.model = model;
+    this.view = view;
   }
 
-  /**
-   * Query interaction from view
-   * @param pn The product number to be checked
-   */
-  public void doQuery( String pn )
-  {
-    model.doQuery(pn);
-  }
-  
-  /**
-   * RStock interaction from view
-   * @param pn       The product number to be re-stocked
-   * @param quantity The quantity to be re-stocked
-   */
-  public void doRStock( String pn, String quantity )
-  {
-    model.doRStock(pn, quantity);
+  public void setCustomerModel(CustomerModel customerModel) {
+    model.setCustomerModel(customerModel);
   }
 
-  /**
-   * Clear interaction from view
-   */
-  public void doClear()
-  {
-    model.doClear();
+  public void doQuery(String productNum) {
+    model.doQuery(productNum);
   }
 
-  
+  public void doRestock(String productNum, String quantity) {
+    model.doRestock(productNum, quantity);
+  }
+
+  public void doRemoveStock(String productNum, String quantity) {
+    model.doRemoveStock(productNum, quantity);
+  }
 }
-

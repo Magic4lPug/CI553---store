@@ -1,5 +1,7 @@
 package clients.cashier;
 
+import clients.backDoor.BackDoorController;
+import clients.backDoor.BackDoorModel;
 import clients.backDoor.BackDoorView;
 import middle.MiddleFactory;
 
@@ -126,6 +128,19 @@ public class CashierView implements Observer {
 
     tabbedPane.addTab("Completed Orders", completedOrdersPanel);
 
+    // Tab 5: Stock Management (BackDoorView)
+    try {
+      BackDoorModel backDoorModel = new BackDoorModel(mf.makeStockReadWriter());
+      BackDoorView backDoorView = new BackDoorView(mf);
+      BackDoorController backDoorController = new BackDoorController(backDoorModel, backDoorView);
+      backDoorView.setController(backDoorController);
+      backDoorModel.addObserver(backDoorView);
+
+      tabbedPane.addTab("Stock Management", backDoorView.getPanel()); // Add BackDoorView as a tab
+    } catch (Exception e) {
+      JOptionPane.showMessageDialog(null, "Error initializing Stock Management tab: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
     tabbedPane.setBounds(0, 0, W, H);
     cp.add(tabbedPane);
 
@@ -152,5 +167,4 @@ public class CashierView implements Observer {
     // Refresh the completed orders table automatically
     completedOrdersTable.setModel(completedOrdersModel.getCompletedOrdersData());
   }
-
 }
