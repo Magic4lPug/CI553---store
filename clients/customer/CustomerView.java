@@ -116,10 +116,11 @@ public class CustomerView implements Observer {
                 showError(model.getErrorMessage());
             } else {
                 System.out.println("Updating product table..."); // Debug: Log updates
-                populateProductTable(model.getProducts());
+                populateProductTable(model.getProducts()); // Refresh with updated stock levels
             }
         }
     }
+
 
     private void showError(String errorMessage) {
         JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);

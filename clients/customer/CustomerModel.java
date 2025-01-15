@@ -2,11 +2,9 @@ package clients.customer;
 
 import catalogue.Basket;
 import catalogue.Product;
-import debug.DEBUG;
 import middle.MiddleFactory;
-import middle.SharedOrderQueue;
-import middle.StockException;
 import middle.StockReader;
+import middle.StockException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,18 +31,25 @@ public class CustomerModel extends Observable {
 
   public void fetchAllProducts() {
     try {
-      products = theStock.getAllProducts(); // Fetch products from the stock
-      setChanged(); // Mark the observable as changed
+      products = theStock.getAllProducts(); // Fetch products from the database
+      markChanged(); // Call the public method to mark the model as changed
       notifyObservers(); // Notify observers to refresh the view
     } catch (StockException e) {
       notifyObserversWithError("Failed to fetch products: " + e.getMessage());
     }
   }
 
+  /**
+   * Public method to expose the `setChanged()` functionality.
+   */
+  public void markChanged() {
+    setChanged(); // Call the protected method from Observable
+  }
+
   public void searchProducts(String query) {
     try {
       products = theStock.searchProducts(query); // Fetch products based on query
-      setChanged();
+      markChanged(); // Mark the model as changed
       notifyObservers(); // Notify observers to refresh the view
     } catch (StockException e) {
       notifyObserversWithError("Search failed: " + e.getMessage());
@@ -53,7 +58,7 @@ public class CustomerModel extends Observable {
 
   public void addToBasket(Product product) {
     theBasket.add(product);
-    setChanged();
+    markChanged();
     notifyObservers("Product added to basket.");
   }
 
@@ -75,20 +80,7 @@ public class CustomerModel extends Observable {
 
   private void notifyObserversWithError(String errorMessage) {
     this.errorMessage = errorMessage;
-    setChanged();
+    markChanged();
     notifyObservers();
-  }
-
-  public boolean checkoutBasket() {
-    try {
-      SharedOrderQueue.addOrder(new Basket(theBasket)); // Add a copy of the basket to the queue
-      theBasket.clear(); // Clear the customer's basket after checkout
-      setChanged();
-      notifyObservers("Basket checked out. Ready for new items.");
-      return true;
-    } catch (Exception e) {
-      notifyObserversWithError("Checkout failed: " + e.getMessage());
-      return false;
-    }
   }
 }

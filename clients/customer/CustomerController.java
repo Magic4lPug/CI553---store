@@ -6,8 +6,6 @@ import catalogue.Product;
 
 import javax.swing.*;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 public class CustomerController {
   private final CustomerModel model;
@@ -26,6 +24,7 @@ public class CustomerController {
 
     // Initialize the basket controller with the model's basket, database connection, and userID
     this.basketController = new BasketController(model.getBasket(), databaseConnection, userID);
+    this.basketController.setCustomerModel(model); // Pass the model to the basket controller
 
     // Add the view as an observer
     model.addObserver(view);
@@ -68,7 +67,7 @@ public class CustomerController {
 
   public void checkoutBasket() {
     if (basketController != null) {
-      basketController.checkoutBasket();
+      basketController.checkoutBasket(); // Now updates stock levels and triggers view refresh
     } else {
       JOptionPane.showMessageDialog(null, "Basket is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
     }
