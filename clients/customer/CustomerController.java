@@ -1,10 +1,10 @@
 package clients.customer;
 
-import catalogue.Basket;
 import catalogue.BasketController;
 import catalogue.Product;
+import javafx.scene.control.Alert;
+import javafx.stage.Stage;
 
-import javax.swing.*;
 import java.sql.Connection;
 
 public class CustomerController {
@@ -14,7 +14,7 @@ public class CustomerController {
   private final BasketController basketController;
   private final String userID; // Unique user identifier
 
-  public CustomerController(CustomerModel model, CustomerView view, Connection databaseConnection, String userID, JFrame mainWindow) {
+  public CustomerController(CustomerModel model, CustomerView view, Connection databaseConnection, String userID, Stage mainWindow) {
     this.model = model;
     this.view = view;
     this.userID = userID;
@@ -42,7 +42,7 @@ public class CustomerController {
     if (basketController != null) {
       basketController.viewBasket();
     } else {
-      JOptionPane.showMessageDialog(null, "Basket is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+      showAlert("Error", "Basket is not initialized.");
     }
   }
 
@@ -55,13 +55,10 @@ public class CustomerController {
               quantity
       );
       model.addToBasket(productToAdd);
-      JOptionPane.showMessageDialog(null, "Added " + quantity + " item(s) to basket!");
+      showAlert("Success", "Added " + quantity + " item(s) to basket!");
       saveBasket();
     } else {
-      JOptionPane.showMessageDialog(null,
-              "Invalid quantity. Please ensure it's greater than 0.",
-              "Error",
-              JOptionPane.ERROR_MESSAGE);
+      showAlert("Error", "Invalid quantity. Please ensure it's greater than 0.");
     }
   }
 
@@ -69,7 +66,7 @@ public class CustomerController {
     if (basketController != null) {
       basketController.checkoutBasket(); // Now updates stock levels and triggers view refresh
     } else {
-      JOptionPane.showMessageDialog(null, "Basket is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+      showAlert("Error", "Basket is not initialized.");
     }
   }
 
@@ -77,7 +74,7 @@ public class CustomerController {
     if (basketController != null) {
       basketController.removeFromBasket(product);
     } else {
-      JOptionPane.showMessageDialog(null, "Basket is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+      showAlert("Error", "Basket is not initialized.");
     }
   }
 
@@ -85,7 +82,7 @@ public class CustomerController {
     if (profileHandler != null) {
       profileHandler.showProfile();
     } else {
-      JOptionPane.showMessageDialog(null, "Profile handler is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+      showAlert("Error", "Profile handler is not initialized.");
     }
   }
 
@@ -93,7 +90,7 @@ public class CustomerController {
     if (basketController != null) {
       basketController.saveBasket();
     } else {
-      JOptionPane.showMessageDialog(null, "Basket is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+      showAlert("Error", "Basket is not initialized.");
     }
   }
 
@@ -101,7 +98,16 @@ public class CustomerController {
     if (basketController != null) {
       basketController.loadBasket();
     } else {
-      JOptionPane.showMessageDialog(null, "Basket is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+      showAlert("Error", "Basket is not initialized.");
     }
+  }
+
+  // Utility method to show alerts
+  private void showAlert(String title, String message) {
+    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    alert.setTitle(title);
+    alert.setHeaderText(null);
+    alert.setContentText(message);
+    alert.showAndWait();
   }
 }

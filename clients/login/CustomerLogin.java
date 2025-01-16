@@ -6,7 +6,6 @@ import dbAccess.UserAccess;
 import javafx.application.Application;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
-import clients.login.LoginView;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -29,7 +28,6 @@ public class CustomerLogin extends Application {
             if (authenticateCustomer(login, password)) {
                 System.out.println("Authentication successful. Launching CustomerClient.");
                 primaryStage.close();
-                launchCustomerClient(login); // Pass userID (login)
             } else {
                 showAlert("Authentication Failed", "Invalid username/email or password.");
             }
@@ -60,14 +58,13 @@ public class CustomerLogin extends Application {
 
                 // Compare hashed passwords
                 if (storedHashedPassword.equals(hashedInputPassword)) {
-                    String userID = userAccess.getUserID(login);
+                    String userID = userAccess.getUserID(login); // Get the userID based on the login
                     if (userID != null) {
                         launchCustomerClient(userID);
                         return true;
                     }
                 }
             }
-            showAlert("Authentication Failed", "Invalid username/email or password.");
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Error", "An error occurred during authentication.");
