@@ -4,10 +4,9 @@ import clients.customer.CustomerClient;
 import dbAccess.DBAccessFactory;
 import dbAccess.UserAccess;
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import clients.login.LoginView;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -20,22 +19,13 @@ public class CustomerLogin extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Customer Login");
+        LoginView loginView = new LoginView();
+        primaryStage.setScene(loginView.createScene(primaryStage));
 
-        // Create UI Elements
-        Label loginLabel = new Label("Username/Email:");
-        TextField loginField = new TextField();
-
-        Label passwordLabel = new Label("Password:");
-        PasswordField passwordField = new PasswordField();
-
-        Button loginButton = new Button("Login");
-        Button registerButton = new Button("Register");
-
-        // Add Action for Login Button
-        loginButton.setOnAction(e -> {
-            String login = loginField.getText();
-            String password = passwordField.getText();
+        // Set up event handlers
+        loginView.getLoginButton().setOnAction(e -> {
+            String login = loginView.getLoginField().getText();
+            String password = loginView.getPasswordField().getText();
             if (authenticateCustomer(login, password)) {
                 System.out.println("Authentication successful. Launching CustomerClient.");
                 primaryStage.close();
@@ -45,31 +35,12 @@ public class CustomerLogin extends Application {
             }
         });
 
-        // Add Action for Register Button
-        registerButton.setOnAction(e -> {
+        loginView.getRegisterButton().setOnAction(e -> {
             RegistrationWindow registrationWindow = new RegistrationWindow();
             registrationWindow.start(new Stage()); // Open Registration Window
         });
 
-        // Create Layout
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.add(loginLabel, 0, 0);
-        grid.add(loginField, 1, 0);
-        grid.add(passwordLabel, 0, 1);
-        grid.add(passwordField, 1, 1);
-        grid.add(loginButton, 0, 2);
-        grid.add(registerButton, 1, 2);
-
-        // Set Scene
-        Scene scene = new Scene(grid, 300, 200);
-        primaryStage.setScene(scene);
-
-        // Debug: Log window visibility
-        System.out.println("CustomerLogin window about to be displayed.");
         primaryStage.show();
-        System.out.println("CustomerLogin window displayed.");
     }
 
     private boolean authenticateCustomer(String login, String password) {
@@ -131,7 +102,7 @@ public class CustomerLogin extends Application {
         alert.showAndWait();
     }
 
-    private String hashPassword(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeySpecException, NoSuchAlgorithmException {
+    private String hashPassword(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
         PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 10000, 256);
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         byte[] hashedBytes = factory.generateSecret(spec).getEncoded();
