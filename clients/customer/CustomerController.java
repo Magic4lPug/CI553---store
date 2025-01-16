@@ -52,7 +52,8 @@ public class CustomerController {
               product.getProductNum(),
               product.getDescription(),
               product.getPrice(),
-              quantity
+              quantity,
+              product.getPicture() // Include the picture field
       );
       model.addToBasket(productToAdd);
       showAlert("Success", "Added " + quantity + " item(s) to basket!");
@@ -61,6 +62,7 @@ public class CustomerController {
       showAlert("Error", "Invalid quantity. Please ensure it's greater than 0.");
     }
   }
+
 
   public void checkoutBasket() {
     if (basketController != null) {

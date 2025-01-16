@@ -53,7 +53,7 @@ public class StockR implements StockReader {
   @Override
   public synchronized Product getDetails(String pNum) throws StockException {
     String query = """
-            SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, StockTable.stockLevel 
+            SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, StockTable.stockLevel, ProductTable.picture
             FROM ProductTable
             JOIN StockTable ON ProductTable.productNo = StockTable.productNo
             WHERE ProductTable.productNo = ?
@@ -66,7 +66,8 @@ public class StockR implements StockReader {
                   rs.getString("productNo"),
                   rs.getString("description"),
                   rs.getDouble("price"),
-                  rs.getInt("stockLevel")
+                  rs.getInt("stockLevel"),
+                  rs.getString("picture") // Add the picture field
           );
         }
         throw new StockException("Product not found: " + pNum);
@@ -76,11 +77,12 @@ public class StockR implements StockReader {
     }
   }
 
+
   @Override
   public synchronized List<Product> getAllProducts() throws StockException {
     List<Product> products = new ArrayList<>();
     String query = """
-            SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, StockTable.stockLevel
+            SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, StockTable.stockLevel, ProductTable.picture
             FROM ProductTable
             JOIN StockTable ON ProductTable.productNo = StockTable.productNo
         """;
@@ -91,7 +93,8 @@ public class StockR implements StockReader {
                 rs.getString("productNo"),
                 rs.getString("description"),
                 rs.getDouble("price"),
-                rs.getInt("stockLevel")
+                rs.getInt("stockLevel"),
+                rs.getString("picture") // Add the picture field
         ));
       }
     } catch (SQLException e) {
@@ -100,11 +103,12 @@ public class StockR implements StockReader {
     return products;
   }
 
+
   @Override
   public synchronized List<Product> searchProducts(String query) throws StockException {
     List<Product> products = new ArrayList<>();
     String sqlQuery = """
-            SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, StockTable.stockLevel
+            SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, StockTable.stockLevel, ProductTable.picture
             FROM ProductTable
             JOIN StockTable ON ProductTable.productNo = StockTable.productNo
             WHERE ProductTable.description LIKE ?
@@ -117,7 +121,8 @@ public class StockR implements StockReader {
                   rs.getString("productNo"),
                   rs.getString("description"),
                   rs.getDouble("price"),
-                  rs.getInt("stockLevel")
+                  rs.getInt("stockLevel"),
+                  rs.getString("picture") // Add the picture field
           ));
         }
       }
@@ -126,6 +131,7 @@ public class StockR implements StockReader {
     }
     return products;
   }
+
 
   @Override
   public synchronized ImageIcon getImage(String pNum) throws StockException {

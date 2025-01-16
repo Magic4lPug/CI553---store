@@ -11,13 +11,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 public class CustomerView extends Stage implements Observer {
-    private static final int H = 550; // Height of window pixels
-    private static final int W = 800; // Width of window pixels
+    private static final int H = 650; // Height of window pixels
+    private static final int W = 900; // Width of window pixels
 
     private final Label pageTitle = new Label("The Treasure Trove");
     private final TextField searchField = new TextField();
@@ -131,6 +132,49 @@ public class CustomerView extends Stage implements Observer {
         });
     }
 
+    private void showInspectWindow(Product product) {
+        Stage inspectStage = new Stage();
+        inspectStage.setTitle("Product Details");
+
+        // Construct the image path dynamically based on the product ID
+        String imagePath = "/images/pic" + product.getProductNum() + ".jpg";
+        ImageView imageView;
+        try {
+            // Ensure the resource path starts with a forward slash
+            InputStream imageStream = getClass().getResourceAsStream(imagePath);
+            if (imageStream == null) {
+                System.err.println("Image not found: " + imagePath);
+                // Fallback to a default image if the specific image is not found
+                imageStream = getClass().getResourceAsStream("/images/default.jpg");
+            }
+            Image image = new Image(imageStream);
+            imageView = new ImageView(image);
+        } catch (Exception e) {
+            // Handle exceptions and load a default image
+            imageView = new ImageView();
+            imageView.setImage(new Image(getClass().getResourceAsStream("/images/default.jpg")));
+        }
+        imageView.setFitWidth(300);
+        imageView.setFitHeight(300);
+        imageView.setPreserveRatio(true);
+
+        Label nameLabel = new Label(product.getDescription());
+        nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
+
+        Label priceLabel = new Label("Price: £" + product.getPrice());
+        priceLabel.setStyle("-fx-font-size: 14px;");
+
+        VBox layout = new VBox(20, imageView, nameLabel, priceLabel);
+        layout.setAlignment(Pos.CENTER);
+        layout.setPadding(new Insets(20));
+        layout.setStyle("-fx-background-color: #FFFFFF;");
+
+        Scene scene = new Scene(layout, 400, 500);
+        inspectStage.setScene(scene);
+        inspectStage.show();
+    }
+
+
     private void populateProductDisplay(List<Product> products) {
         productDisplay.getChildren().clear();
         for (Product product : products) {
@@ -159,7 +203,11 @@ public class CustomerView extends Stage implements Observer {
         selectButton.setStyle("-fx-background-color: #000; -fx-text-fill: #FFD700; -fx-font-weight: bold;");
         selectButton.setOnAction(e -> showQuantityDialog(product));
 
-        block.getChildren().addAll(nameLabel, priceLabel, stockLabel, selectButton);
+        Button inspectButton = new Button("Inspect");
+        inspectButton.setStyle("-fx-background-color: #000; -fx-text-fill: #FFD700; -fx-font-weight: bold;");
+        inspectButton.setOnAction(e -> showInspectWindow(product));
+
+        block.getChildren().addAll(nameLabel, priceLabel, stockLabel, selectButton, inspectButton);
         return block;
     }
 

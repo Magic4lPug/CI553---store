@@ -52,7 +52,7 @@ class Setup {
           "INSERT INTO ProductTable VALUES ('0004', 'Watch', 'images/pic0004.jpg', 49.99);",
           "INSERT INTO ProductTable VALUES ('0005', 'Wireless Headphones', 'images/pic0005.jpg', 89.99);",
           "INSERT INTO ProductTable VALUES ('0006', 'Smartphone', 'images/pic0006.jpg', 499.00);",
-          "INSERT INTO ProductTable VALUES ('0007', 'Gaming Console', 'images/pic0007.jpg', 399.00);",
+          "INSERT INTO ProductTable VALUES ('0007', 'USB', 'images/pic0007.jpg', 5.00);",
           "INSERT INTO ProductTable VALUES ('0008', 'Laptop', 'images/pic0008.jpg', 899.00);",
 
           // Insert stock
