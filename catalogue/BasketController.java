@@ -63,7 +63,7 @@ public class BasketController {
                 basket.addAll(loadedBasket); // Load basket for the current user
                 updateBasketView();
             } else {
-                JOptionPane.showMessageDialog(null, "No saved basket found for this user.");
+                System.out.println("No saved basket found for this user.");
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Failed to load basket: " + e.getMessage());

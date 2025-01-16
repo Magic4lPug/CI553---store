@@ -2,10 +2,16 @@ package dbAccess;
 
 import middle.StockException;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Base64;
 
 public class UserAccess {
     private final Connection theCon;
@@ -52,17 +58,44 @@ public class UserAccess {
     }
 
     public void createUser(String userID, String username, String password, String email, String role) throws StockException {
-        String query = "INSERT INTO UserTable (userID, username, password, email, role) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO UserTable (userID, username, password, salt, email, role) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = theCon.prepareStatement(query)) {
+            byte[] salt = generateSalt();
+            String hashedPassword = hashPassword(password, salt);
+
             stmt.setString(1, userID);
             stmt.setString(2, username);
-            stmt.setString(3, password);
-            stmt.setString(4, email);
-            stmt.setString(5, role);
+            stmt.setString(3, hashedPassword);
+            stmt.setString(4, Base64.getEncoder().encodeToString(salt)); // Store salt as Base64 string
+            stmt.setString(5, email);
+            stmt.setString(6, role);
+
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new StockException("SQL createUser: " + e.getMessage());
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new StockException("Error hashing password: " + e.getMessage());
         }
+    }
+
+    public String[] getCredentialsByLogin(String login) throws StockException {
+        String query = login.contains("@")
+                ? "SELECT salt, password FROM UserTable WHERE email = ?"
+                : "SELECT salt, password FROM UserTable WHERE username = ?";
+
+        try (PreparedStatement stmt = theCon.prepareStatement(query)) {
+            stmt.setString(1, login);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String salt = rs.getString("salt");
+                    String hashedPassword = rs.getString("password");
+                    return new String[]{salt, hashedPassword};
+                }
+            }
+        } catch (SQLException e) {
+            throw new StockException("SQL getCredentialsByLogin: " + e.getMessage());
+        }
+        return null; // Return null if no credentials are found
     }
 
     public boolean authenticateWithEmail(String email, String password) throws StockException {
@@ -77,6 +110,21 @@ public class UserAccess {
             throw new StockException("SQL authenticateWithEmail: " + e.getMessage());
         }
     }
+
+    private byte[] generateSalt() {
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[16];
+        random.nextBytes(salt);
+        return salt;
+    }
+
+    private String hashPassword(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 10000, 256);
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        byte[] hashedBytes = factory.generateSecret(spec).getEncoded();
+        return Base64.getEncoder().encodeToString(hashedBytes);
+    }
+
 
     public byte[] getBasketData(String userID) throws StockException {
         String query = "SELECT basketData FROM BasketTable WHERE userID = ?";

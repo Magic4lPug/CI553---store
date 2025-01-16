@@ -35,6 +35,7 @@ class Setup {
                   "userID TEXT PRIMARY KEY," +
                   "username TEXT NOT NULL," +
                   "password TEXT NOT NULL," +
+                  "salt TEXT NOT NULL," +
                   "email TEXT NOT NULL," +
                   "role TEXT);",
 
@@ -64,11 +65,7 @@ class Setup {
           "INSERT INTO StockTable VALUES ('0007', 10);",
           "INSERT INTO StockTable VALUES ('0008', 5);",
 
-          // Insert users
-          "INSERT INTO UserTable VALUES ('U001', 'admin', 'admin123', 'admin@example.com', 'admin');",
-          "INSERT INTO UserTable VALUES ('U002', 'john_doe', 'password123', 'john.doe@example.com', 'customer');",
-          "INSERT INTO UserTable VALUES ('U003', 'jane_doe', 'pass456', 'jane.doe@example.com', 'customer');"
-  };
+         };
 
 
   public static void main(String[] args) {

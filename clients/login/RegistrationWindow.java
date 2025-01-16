@@ -55,6 +55,11 @@ public class RegistrationWindow extends Application {
                 return;
             }
 
+            if (!isValidPassword(password)) {
+                showAlert("Error", "Password must be at least 8 characters long and include a mix of uppercase letters, lowercase letters, numbers, and special characters.");
+                return;
+            }
+
             if (!isValidEmail(email)) {
                 showAlert("Error", "Please include an email in the following format: example@domain.com");
                 return;
@@ -107,6 +112,12 @@ public class RegistrationWindow extends Application {
         Scene scene = new Scene(grid, 350, 250);
         registerStage.setScene(scene);
         registerStage.show();
+    }
+
+    private boolean isValidPassword(String password) {
+        // Regex for password validation
+        String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-\\[\\]{}|;:',.<>?/]).{8,}$";
+        return password.matches(passwordPattern);
     }
 
     private boolean isValidEmail(String email) {

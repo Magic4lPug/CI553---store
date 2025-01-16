@@ -29,9 +29,9 @@ public class CashierController {
   public void packTask(int taskIndex) {
     if (taskIndex >= 0) {
       model.packTask(taskIndex);
-      JOptionPane.showMessageDialog(null, "Task successfully moved to completed orders!");
+      System.out.println("Task successfully moved to completed orders!");
     } else {
-      JOptionPane.showMessageDialog(null, "No task selected for packing!");
+      System.out.println("No task selected for packing!");
     }
   }
 
