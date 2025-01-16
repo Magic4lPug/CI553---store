@@ -38,6 +38,7 @@ public class BackDoorView implements Observer {
     // Page title
     pageTitle.setBounds(100, 10, 200, 20);
     pageTitle.setFont(new Font("Arial", Font.BOLD, 16));
+    pageTitle.setForeground(Color.YELLOW);
     panel.add(pageTitle);
 
     // Query button

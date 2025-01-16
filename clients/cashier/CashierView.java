@@ -47,11 +47,13 @@ public class CashierView implements Observer {
 
     // Tab 1: Tasks
     JPanel taskPanel = new JPanel(null);
+    taskPanel.setBackground(Color.DARK_GRAY);
     taskScrollPane.setBounds(10, 10, 560, 300);
     taskPanel.add(taskScrollPane);
 
     JButton claimTaskButton = new JButton("Claim Task");
     claimTaskButton.setBounds(10, 320, 150, 30);
+    styleButton(claimTaskButton);
     claimTaskButton.addActionListener(e -> {
       int selectedRow = taskTable.getSelectedRow();
       if (selectedRow != -1) {
@@ -66,10 +68,12 @@ public class CashierView implements Observer {
 
     // Tab 2: Processing Tasks
     JPanel processingTaskPanel = new JPanel(null);
+    processingTaskPanel.setBackground(Color.DARK_GRAY);
     processingTaskScrollPane.setBounds(10, 10, 560, 300);
     processingTaskPanel.add(processingTaskScrollPane);
 
     completeTaskButton.setBounds(10, 320, 150, 30);
+    styleButton(completeTaskButton);
     completeTaskButton.addActionListener(e -> {
       int selectedRow = processingTaskTable.getSelectedRow();
       if (selectedRow != -1) {
@@ -84,10 +88,12 @@ public class CashierView implements Observer {
 
     // Tab 3: Packed Tasks
     JPanel packedTaskPanel = new JPanel(null);
+    packedTaskPanel.setBackground(Color.DARK_GRAY);
     packedTaskScrollPane.setBounds(10, 10, 560, 300);
     packedTaskPanel.add(packedTaskScrollPane);
 
     packTaskButton.setBounds(10, 320, 150, 30);
+    styleButton(packTaskButton);
     packTaskButton.addActionListener(e -> {
       int selectedRow = packedTaskTable.getSelectedRow();
       if (selectedRow != -1) {
@@ -103,13 +109,16 @@ public class CashierView implements Observer {
 
     // Tab 4: Completed Orders
     JPanel completedOrdersPanel = new JPanel(null);
+    completedOrdersPanel.setBackground(Color.DARK_GRAY);
     completedOrdersScrollPane.setBounds(10, 50, 560, 260);
     completedOrdersPanel.add(completedOrdersScrollPane);
 
     searchBox.setBounds(10, 10, 200, 30);
+    styleTextField(searchBox);
     completedOrdersPanel.add(searchBox);
 
     searchButton.setBounds(220, 10, 100, 30);
+    styleButton(searchButton);
     searchButton.addActionListener(e -> {
       String orderID = searchBox.getText().trim();
       if (!orderID.isEmpty()) {
@@ -136,17 +145,34 @@ public class CashierView implements Observer {
       backDoorView.setController(backDoorController);
       backDoorModel.addObserver(backDoorView);
 
-      tabbedPane.addTab("Stock Management", backDoorView.getPanel()); // Add BackDoorView as a tab
+      JPanel stockManagementPanel = backDoorView.getPanel();
+      stockManagementPanel.setBackground(Color.DARK_GRAY);
+      tabbedPane.addTab("Stock Management", stockManagementPanel); // Add Stock Management as a tab
     } catch (Exception e) {
       JOptionPane.showMessageDialog(null, "Error initializing Stock Management tab: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     tabbedPane.setBounds(0, 0, W, H);
+    tabbedPane.setBackground(Color.BLACK);
+    tabbedPane.setForeground(Color.YELLOW);
     cp.add(tabbedPane);
 
     rootWindow.setVisible(true);
 
     completedOrdersTable.setModel(completedOrdersModel.getCompletedOrdersData());
+  }
+
+  private void styleButton(JButton button) {
+    button.setBackground(Color.BLACK);
+    button.setForeground(Color.YELLOW);
+    button.setFont(new Font("Arial", Font.BOLD, 12));
+  }
+
+  private void styleTextField(JTextField textField) {
+    textField.setBackground(Color.BLACK);
+    textField.setForeground(Color.YELLOW);
+    textField.setCaretColor(Color.YELLOW);
+    textField.setFont(new Font("Arial", Font.PLAIN, 12));
   }
 
   public void setController(CashierController c) {
