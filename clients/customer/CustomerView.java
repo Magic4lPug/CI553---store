@@ -27,6 +27,7 @@ public class CustomerView extends Stage implements Observer {
     private final Label theAction = new Label();
     private final Button profileImg = new Button();
     private final ImageView logoImageView = new ImageView(new Image("images/treasure_trove_logo.png"));
+    private final Button refreshButton = new Button("Refresh");
 
     private final TilePane productDisplay = new TilePane();
     private CustomerController cont;
@@ -59,7 +60,17 @@ public class CustomerView extends Stage implements Observer {
         searchButton.setStyle("-fx-background-color: #FFD700; -fx-text-fill: #000000; -fx-font-weight: bold;");
         basketButton.setStyle("-fx-background-color: #FFD700; -fx-text-fill: #000000; -fx-font-weight: bold;");
 
+        // Configure ScrollPane for Product Display
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(productDisplay);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setStyle("-fx-background: #2E2E2E; -fx-padding: 10px;");
+
         // Product Display Configuration
+        productDisplay.setPrefTileWidth(150); // Smaller item width
+        productDisplay.setPrefTileHeight(200); // Smaller item height
         productDisplay.setHgap(20); // Horizontal spacing
         productDisplay.setVgap(20); // Vertical spacing
         productDisplay.setPadding(new Insets(20));
@@ -76,15 +87,18 @@ public class CustomerView extends Stage implements Observer {
         topBar.setPadding(new Insets(20)); // Add padding for a cleaner layout
         topBar.setSpacing(30); // Increase spacing between elements
 
-        HBox searchBar = new HBox(10, searchField, searchButton, basketButton);
+        HBox searchBar = new HBox(10, searchField, searchButton, basketButton,refreshButton);
         searchBar.setAlignment(Pos.CENTER);
 
-        VBox root = new VBox(20, topBar, searchBar, productDisplay, theAction);
+        VBox root = new VBox(20, topBar, searchBar, scrollPane, theAction);
         root.setAlignment(Pos.CENTER);
         root.setStyle("-fx-padding: 15px; -fx-background-color: #2E2E2E;");
 
         Scene scene = new Scene(root, W, H);
         setScene(scene);
+
+        refreshButton.setStyle("-fx-background-color: #FFD700; -fx-text-fill: #000000; -fx-font-weight: bold;");
+
     }
 
     public void setController(CustomerController c) {
@@ -95,6 +109,8 @@ public class CustomerView extends Stage implements Observer {
             searchButton.setOnAction(e -> cont.doSearch(searchField.getText()));
             basketButton.setOnAction(e -> cont.viewBasket());
             profileImg.setOnAction(e -> cont.viewProfile()); // Attach action to the profileImg button
+            refreshButton.setOnAction(e -> cont.refreshProducts());
+
         });
     }
 

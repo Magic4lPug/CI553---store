@@ -112,4 +112,10 @@ public class CustomerController {
     alert.setContentText(message);
     alert.showAndWait();
   }
+
+  public void refreshProducts() {
+    // Logic to refresh products
+    model.fetchAllProducts();
+  }
+
 }

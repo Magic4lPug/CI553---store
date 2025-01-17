@@ -54,6 +54,14 @@ class Setup {
           "INSERT INTO ProductTable VALUES ('0006', 'Smartphone', 'images/pic0006.jpg', 499.00);",
           "INSERT INTO ProductTable VALUES ('0007', 'USB', 'images/pic0007.jpg', 5.00);",
           "INSERT INTO ProductTable VALUES ('0008', 'Laptop', 'images/pic0008.jpg', 899.00);",
+          "INSERT INTO ProductTable VALUES ('0009', 'Nintendo Switch', 'images/pic0009.jpg', 399.00);",
+          "INSERT INTO ProductTable VALUES ('0010', 'Table', 'images/pic0010.jpg', 120.00);",
+          "INSERT INTO ProductTable VALUES ('0011', 'Chair', 'images/pic0011.jpg', 40.00);",
+          "INSERT INTO ProductTable VALUES ('0012', 'Coat', 'images/pic0012.jpg', 130.00);",
+          "INSERT INTO ProductTable VALUES ('0013', 'Trainers', 'images/pic0013.jpg', 60.00);",
+          "INSERT INTO ProductTable VALUES ('0014', '5KG Weights', 'images/pic0014.jpg', 10.00);",
+          "INSERT INTO ProductTable VALUES ('0015', 'Fireworks', 'images/pic0015.jpg', 80.00);",
+          "INSERT INTO ProductTable VALUES ('0016', 'Teddy', 'images/pic0016.jpg', 20.00);",
 
           // Insert stock
           "INSERT INTO StockTable VALUES ('0001', 90);",
@@ -64,6 +72,14 @@ class Setup {
           "INSERT INTO StockTable VALUES ('0006', 15);",
           "INSERT INTO StockTable VALUES ('0007', 10);",
           "INSERT INTO StockTable VALUES ('0008', 5);",
+          "INSERT INTO StockTable VALUES ('0009', 10);",
+          "INSERT INTO StockTable VALUES ('0010', 20);",
+          "INSERT INTO StockTable VALUES ('0011', 30);",
+          "INSERT INTO StockTable VALUES ('0012', 40);",
+          "INSERT INTO StockTable VALUES ('0013', 50);",
+          "INSERT INTO StockTable VALUES ('0014', 60);",
+          "INSERT INTO StockTable VALUES ('0015', 70);",
+          "INSERT INTO StockTable VALUES ('0016', 80);",
 
          };
 
