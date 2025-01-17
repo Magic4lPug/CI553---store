@@ -19,10 +19,10 @@ public class CustomerController {
     this.view = view;
     this.userID = userID;
 
-    // Initialize the profile handler dynamically with the userID and the main window reference
+    // Initialise the profile handler dynamically with the userID and the main window reference
     this.profileHandler = new CustomerProfileHandler(userID, mainWindow);
 
-    // Initialize the basket controller with the model's basket, database connection, and userID
+    // Initialise the basket controller with the model's basket, database connection, and userID
     this.basketController = new BasketController(model.getBasket(), databaseConnection, userID);
     this.basketController.setCustomerModel(model); // Pass the model to the basket controller
 
@@ -66,7 +66,7 @@ public class CustomerController {
 
   public void checkoutBasket() {
     if (basketController != null) {
-      basketController.checkoutBasket(); // Now updates stock levels and triggers view refresh
+      basketController.checkoutBasket(); // Updates stock levels and triggers view refresh
     } else {
       showAlert("Error", "Basket is not initialized.");
     }

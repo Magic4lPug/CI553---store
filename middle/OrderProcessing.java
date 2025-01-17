@@ -7,8 +7,6 @@ import java.util.Map;
 
 /**
   * Defines the interface for accessing the order processing system.
-  * @author  Mike Smith University of Brighton
-  * @version 2.0
   */
 
 public interface OrderProcessing

@@ -43,7 +43,7 @@ public class CashierView implements Observer {
     rootWindow.setSize(W, H);
     rootWindow.setLocation(x, y);
 
-    completedOrdersModel = new CompletedOrdersModel(mf); // Initialize CompletedOrdersModel
+    completedOrdersModel = new CompletedOrdersModel(mf); // Initialise CompletedOrdersModel
 
     // Tab 1: Tasks
     JPanel taskPanel = new JPanel(null);

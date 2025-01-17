@@ -57,13 +57,13 @@ public class CustomerClient extends Application {
   private static void launchApplication(MiddleFactory mf, Connection databaseConnection, String userID) {
     javafx.application.Platform.runLater(() -> {
       if (customerWindow == null) {
-        customerWindow = new Stage(); // Initialize the JavaFX Stage
+        customerWindow = new Stage(); // Initialise the JavaFX Stage
       }
       customerWindow.setTitle("Customer Client - The Treasure Trove");
 
       // Set up the MVC components
       CustomerModel model = new CustomerModel(mf);
-      CustomerView view = new CustomerView(); // Updated to JavaFX view
+      CustomerView view = new CustomerView();
       CustomerController cont = new CustomerController(model, view, databaseConnection, userID, customerWindow);
       view.setController(cont);
 
@@ -75,7 +75,7 @@ public class CustomerClient extends Application {
 
   @Override
   public void start(Stage primaryStage) {
-    // This method is required for JavaFX applications but is unused here.
+
     throw new UnsupportedOperationException("Use launchWithUser() to start the application.");
   }
 }

@@ -20,7 +20,7 @@ public class BackDoorClient {
         mrf.setOrderInfo(orderURL);   // Set order processing URL
 
         // CustomerModel must be initialized and passed here
-        CustomerModel customerModel = new CustomerModel(mrf); // Initialize CustomerModel
+        CustomerModel customerModel = new CustomerModel(mrf); // Initialise CustomerModel
         displayGUI(mrf, customerModel); // Pass factory and CustomerModel to GUI
     }
 

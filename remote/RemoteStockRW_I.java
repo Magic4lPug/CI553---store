@@ -13,8 +13,7 @@ import java.rmi.RemoteException;
 
 /**
  * Defines the RMI interface for read/write access to the stock object.
- * @author  Mike Smith University of Brighton
- * @version 2.0
+
  */
 
 public interface RemoteStockRW_I

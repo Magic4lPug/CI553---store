@@ -15,8 +15,7 @@ import java.util.Map;
 /**
  * Facade for the order processing handling which is implemented on the middle tier.
  * This code is incomplete
- * @author  Mike Smith University of Brighton
- * @version 2.0
+
  */
 
 public class F_Order implements OrderProcessing

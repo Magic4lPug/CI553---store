@@ -2,8 +2,7 @@ package dbAccess;
 
 /**
   * Implements management of an mySQL database on Linux.
-  * @author  Mike Smith University of Brighton
-  * @version 2.0
+
   */
 class LinuxAccess extends DBAccess
 {

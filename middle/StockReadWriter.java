@@ -4,8 +4,6 @@ import catalogue.Product;
 
 /**
   * Interface for read/write access to the stock list.
-  * @author  Mike Smith University of Brighton
-  * @version 2.0
   */
  
 public interface StockReadWriter extends StockReader

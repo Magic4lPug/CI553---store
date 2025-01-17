@@ -6,8 +6,7 @@ import java.util.ArrayList;
 /**
  * A collection of products,
  * used to record the products that are to be wished to be purchased.
- * @author  Mike Smith University of Brighton
- * @version 2.2
+
  */
 public class Basket extends ArrayList<Product> implements Serializable {
   private static final long serialVersionUID = 1;

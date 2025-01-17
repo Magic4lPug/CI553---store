@@ -11,8 +11,7 @@ import java.util.List;
 /**
  * Implements Read/Write access to the stock list,
  * the stock list is held in a relational DataBase.
- * @author  Mike Smith University of Brighton
- * @version 2.1
+
  */
 public class R_StockRW
         extends java.rmi.server.UnicastRemoteObject

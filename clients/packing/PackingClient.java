@@ -8,8 +8,6 @@ import javax.swing.*;
 
 /**
  * The standalone warehouse Packing Client. Warehouse staff to pack the bought order.
- * @author  Mike
- * @version 2.0
  */
 public class PackingClient {
     public static void main(String[] args) {

@@ -16,7 +16,7 @@ public class WorkerLogin extends Application {
     }
 
     public boolean authenticateWorker(String password) {
-        // Replace with your worker authentication logic
+
         return "worker123".equals(password);
     }
 

@@ -21,9 +21,9 @@ public class BasketController {
     public BasketController(Basket basket, Connection databaseConnection, String userID) {
         this.basket = basket;
         this.databaseConnection = databaseConnection;
-        this.userID = userID; // Initialize userID
+        this.userID = userID; // Initialise userID
         this.basketView = new BasketView(basket, this, userID); // Pass userID to BasketView
-        updateBasketView(); // Ensure the view is initialized with current basket contents
+        updateBasketView(); // Ensure the view is initialised with current basket contents
     }
 
     // Setter for CustomerModel to refresh product table after checkout

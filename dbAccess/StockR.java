@@ -67,7 +67,7 @@ public class StockR implements StockReader {
                   rs.getString("description"),
                   rs.getDouble("price"),
                   rs.getInt("stockLevel"),
-                  rs.getString("picture") // Add the picture field
+                  rs.getString("picture")
           );
         }
         throw new StockException("Product not found: " + pNum);
@@ -94,7 +94,7 @@ public class StockR implements StockReader {
                 rs.getString("description"),
                 rs.getDouble("price"),
                 rs.getInt("stockLevel"),
-                rs.getString("picture") // Add the picture field
+                rs.getString("picture")
         ));
       }
     } catch (SQLException e) {
@@ -122,7 +122,7 @@ public class StockR implements StockReader {
                   rs.getString("description"),
                   rs.getDouble("price"),
                   rs.getInt("stockLevel"),
-                  rs.getString("picture") // Add the picture field
+                  rs.getString("picture")
           ));
         }
       }

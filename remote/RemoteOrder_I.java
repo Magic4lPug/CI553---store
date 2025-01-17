@@ -10,8 +10,7 @@ import java.util.Map;
 
 /**
  * Defines the RMI interface for the Order object.
- * @author  Mike Smith University of Brighton
- * @version 2.0
+
  */
 
 public interface RemoteOrder_I extends Remote

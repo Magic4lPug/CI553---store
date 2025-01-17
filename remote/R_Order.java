@@ -12,8 +12,7 @@ import java.util.Map;
 /**
  * The order processing handling.
  * This code is incomplete
- * @author  Mike Smith University of Brighton
- * @version 2.0
+
  */
 
 public class      R_Order

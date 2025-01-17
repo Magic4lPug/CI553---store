@@ -28,7 +28,7 @@ public class CompletedOrdersModel {
         List<Object[]> rows = new ArrayList<>();
 
         try (PreparedStatement ps = databaseConnection.prepareStatement(
-                "SELECT taskID, taskData FROM TaskTable WHERE status = 'Completed'")) { // Corrected to 'Completed'
+                "SELECT taskID, taskData FROM TaskTable WHERE status = 'Completed'")) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 int taskID = rs.getInt("taskID");
@@ -48,7 +48,7 @@ public class CompletedOrdersModel {
         List<Object[]> rows = new ArrayList<>();
 
         try (PreparedStatement ps = databaseConnection.prepareStatement(
-                "SELECT taskID, taskData FROM TaskTable WHERE taskID = ? AND status = 'Completed'")) { // Corrected to 'Completed'
+                "SELECT taskID, taskData FROM TaskTable WHERE taskID = ? AND status = 'Completed'")) {
             ps.setInt(1, orderID);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {

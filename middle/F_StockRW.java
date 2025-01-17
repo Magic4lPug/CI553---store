@@ -5,8 +5,7 @@ package middle;
  * The actual implementation of this is held on the middle tier.
  * The actual stock list is held in a relational DataBase on the 
  * third tier.
- * @author  Mike Smith University of Brighton
- * @version 2.0
+
  */
 
 import catalogue.Product;

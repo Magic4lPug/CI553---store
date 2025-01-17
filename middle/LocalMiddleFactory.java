@@ -1,8 +1,3 @@
-/**
- * @author  Mike Smith University of Brighton
- * @version 2.2
- */
-
 package middle;
 
 import dbAccess.StockR;

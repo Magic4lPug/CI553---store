@@ -18,8 +18,7 @@ import java.util.*;
  * <BR><B>Waiting to be processed<BR>
  * Currently being packed<BR>
  * Waiting to be collected<BR></B>
- * @author  Mike Smith University of Brighton
- * @version 3.0
+
  */
  
 public class Order implements OrderProcessing

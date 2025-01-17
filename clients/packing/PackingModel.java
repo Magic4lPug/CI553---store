@@ -85,7 +85,7 @@ public class PackingModel extends Observable
       try
       {
         boolean isFree = worker.claim();     // Are we free
-        if ( isFree )                        // T
+        if ( isFree )                        //
         {                                    //
           Basket sb = 
             theOrder.getOrderToPack();       //  Order 
@@ -93,7 +93,7 @@ public class PackingModel extends Observable
           {                                  //  T
             theBasket.set(sb);               //   Working on
             theAction = "Bought Receipt";     //   what to do
-          } else {                           //  F
+          } else {                           //
             worker.free();                   //  Free
             theAction = "";                  // 
           }
